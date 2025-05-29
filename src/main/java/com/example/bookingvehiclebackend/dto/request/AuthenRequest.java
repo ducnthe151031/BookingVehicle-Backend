@@ -1,5 +1,4 @@
 package com.example.bookingvehiclebackend.dto.request;
-
 import com.example.bookingvehiclebackend.dto.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
