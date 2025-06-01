@@ -5,8 +5,8 @@ import com.example.bookingvehiclebackend.dto.Token;
 import com.example.bookingvehiclebackend.dto.User;
 import com.example.bookingvehiclebackend.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.dto.response.LoginResponse;
-import com.example.bookingvehiclebackend.exception.NhgClientException;
-import com.example.bookingvehiclebackend.exception.NhgErrorHandler;
+import com.example.bookingvehiclebackend.exception.PvrsClientException;
+import com.example.bookingvehiclebackend.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.repository.TokenRepository;
 import com.example.bookingvehiclebackend.repository.UserRepository;
 import com.example.bookingvehiclebackend.service.AuthenService;
@@ -68,7 +68,7 @@ public class AuthenServiceImpl implements AuthenService {
     @Override
     public LoginResponse register(AuthenRequest request, HttpServletRequest httpServletRequest) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw NhgClientException.ofHandler(NhgErrorHandler.USER_IS_EXISTED);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
         }
 //        if(ObjectUtils.isEmpty(request.getEmail())){
 //            throw new RuntimeException("Email is required");

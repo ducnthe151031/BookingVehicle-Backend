@@ -4,7 +4,7 @@ package com.example.bookingvehiclebackend.exception;
 import com.example.bookingvehiclebackend.utils.BeanUtils;
 import com.example.bookingvehiclebackend.utils.MessageUtils;
 
-public enum NhgErrorHandler implements INhgErrorHandler{
+public enum PvrsErrorHandler implements IPvrsErrorHandler {
     SYSTEM_ERROR("MEA0000011", "common.BaseApiResponse.systemError"),
     INVALID_INPUT("MEA000001", "common.apiResponse.invalidInput" ),
     UNAUTHORIZED("Unauthorized", "common.apiResponse.unauthorized"),
@@ -24,7 +24,7 @@ public enum NhgErrorHandler implements INhgErrorHandler{
     private final String code;
     private final String message;
 
-     NhgErrorHandler(String code, String message) {
+     PvrsErrorHandler(String code, String message) {
         this.code = code;
         this.message = message;
     }

@@ -1,7 +1,7 @@
 package com.example.bookingvehiclebackend.utils;
 
 
-import com.example.bookingvehiclebackend.exception.INhgErrorHandler;
+import com.example.bookingvehiclebackend.exception.IPvrsErrorHandler;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -34,10 +34,10 @@ public class BaseApiResponse<T> {
         return new BaseApiResponse<>(HttpStatus.OK.value(), "MSG000000", messageUtils.getMessage("common.BaseApiResponse.success"), data);
     }
 
-    public static <T> BaseApiResponse<T> failedOfBadRequest(INhgErrorHandler error) {
+    public static <T> BaseApiResponse<T> failedOfBadRequest(IPvrsErrorHandler error) {
         return new BaseApiResponse<>(HttpStatus.BAD_REQUEST.value(), error.getCode(), error.getMessage(), null);
     }
-    public static <T> BaseApiResponse<T> invalidCredentials(INhgErrorHandler error) {
+    public static <T> BaseApiResponse<T> invalidCredentials(IPvrsErrorHandler error) {
         return new BaseApiResponse<>(HttpStatus.UNAUTHORIZED.value(), error.getCode(), error.getMessage(), null);
     }
 

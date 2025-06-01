@@ -1,6 +1,6 @@
 package com.example.bookingvehiclebackend.exception.model;
 
-import com.example.bookingvehiclebackend.exception.NhgErrorHandler;
+import com.example.bookingvehiclebackend.exception.PvrsErrorHandler;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -20,7 +20,7 @@ public class NhgError {
     }
 
     public static NhgError http500Error() {
-        return new NhgError(HttpStatus.BAD_REQUEST, NhgErrorHandler.SYSTEM_ERROR.getCode(), NhgErrorHandler.SYSTEM_ERROR.getMessage());
+        return new NhgError(HttpStatus.BAD_REQUEST, PvrsErrorHandler.SYSTEM_ERROR.getCode(), PvrsErrorHandler.SYSTEM_ERROR.getMessage());
     }
 
 }

@@ -1,6 +1,6 @@
 package com.example.bookingvehiclebackend.exception;
 
-public interface INhgErrorHandler {
+public interface IPvrsErrorHandler {
     String getCode();
 
     String getMessage();
