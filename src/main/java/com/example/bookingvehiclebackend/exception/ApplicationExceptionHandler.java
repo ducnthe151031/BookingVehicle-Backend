@@ -1,7 +1,7 @@
 package com.example.bookingvehiclebackend.exception;
 
 
-import com.example.bookingvehiclebackend.exception.model.NhgError;
+import com.example.bookingvehiclebackend.exception.model.PvrsError;
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.utils.ErrorMappingUtils;
 import com.example.bookingvehiclebackend.utils.MessageUtils;
@@ -95,7 +95,7 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler({PvrsClientException.class})
     protected ResponseEntity<Object> handleNhgClientException(PvrsClientException exception) {
-        NhgError error = ErrorMappingUtils.getError(exception.getErrorCode());
+        PvrsError error = ErrorMappingUtils.getError(exception.getErrorCode());
         return new ResponseEntity<>(BaseApiResponse.failedOfBadRequest(this.toError(error.getErrorCode(), exception.getErrorMessage())), HttpStatus.BAD_REQUEST);
     }
 
