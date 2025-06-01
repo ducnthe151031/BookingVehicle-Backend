@@ -48,7 +48,7 @@ public class ApplicationExceptionHandler {
     protected ResponseEntity<Object> handleUndeclaredException(UndeclaredThrowableException e) {
         Throwable cause = e.getCause();
         if (cause instanceof PvrsClientException ex) {
-            return this.handleNhgClientException(ex);
+            return this.handlePvrsClientException(ex);
         } else {
             log.error("UndeclaredThrowableException occurred", e);
             return this.handleException(e);
@@ -94,7 +94,7 @@ public class ApplicationExceptionHandler {
     }
 
     @ExceptionHandler({PvrsClientException.class})
-    protected ResponseEntity<Object> handleNhgClientException(PvrsClientException exception) {
+    protected ResponseEntity<Object> handlePvrsClientException(PvrsClientException exception) {
         PvrsError error = ErrorMappingUtils.getError(exception.getErrorCode());
         return new ResponseEntity<>(BaseApiResponse.failedOfBadRequest(this.toError(error.getErrorCode(), exception.getErrorMessage())), HttpStatus.BAD_REQUEST);
     }

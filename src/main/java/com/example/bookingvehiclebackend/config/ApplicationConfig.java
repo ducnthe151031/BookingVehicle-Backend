@@ -22,7 +22,7 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            //                .orElseThrow(() -> NhgClientException.ofHandler(NhgErrorHandler.USERNAME_NOT_FOUND));
+
             return userRepository.findByUsername(username).orElse(new User());
         };
     }
