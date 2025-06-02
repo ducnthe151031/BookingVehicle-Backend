@@ -3,6 +3,7 @@ package com.example.bookingvehiclebackend.controller;
 import com.example.bookingvehiclebackend.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.service.AuthenService;
+import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
