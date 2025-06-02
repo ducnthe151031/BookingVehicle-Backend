@@ -10,7 +10,7 @@ import java.util.Collection;
 
 
 @Entity
-@Table(name = "user", schema = "bookingcar")
+@Table(name = "user", schema = "car_rental_system")
 public class User implements  UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,6 +38,39 @@ public class User implements  UserDetails {
     @ColumnDefault("'INACTIVE'")
     @Column(name = "flag_active", nullable = false, length = 100)
     private String flagActive;
+
+    @Column(name = "full_name", length = 100)
+    private String fullName;
+
+    @Column(name = "phone_number", length = 100)
+    private String phoneNumber;
+
+    @Column(name = "avartar_url", length = 100)
+    private String avartarUrl;
+
+    public String getAvartarUrl() {
+        return avartarUrl;
+    }
+
+    public void setAvartarUrl(String avartarUrl) {
+        this.avartarUrl = avartarUrl;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
 
     @Override
