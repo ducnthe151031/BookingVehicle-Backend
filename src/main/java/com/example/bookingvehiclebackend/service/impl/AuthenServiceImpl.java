@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,14 +34,17 @@ public class AuthenServiceImpl implements AuthenService {
 
     @Override
     public LoginResponse login(AuthenRequest request) {
-        // Authenticate the user with email and password
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getUsername(), request.getPassword()));
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    request.getUsername(), request.getPassword()));
+        } catch (Exception ex) {
+            throw NhgClientException.ofHandler(NhgErrorHandler.UNAUTHORIZED);
+        }
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User name not found"));
+                .orElseThrow(NhgClientException.supplier(NhgErrorHandler.UNAUTHORIZED));
 
         if (!"ACTIVE".equals(user.getFlagActive())) {
-            throw new RuntimeException("Account is not verified");
+            throw NhgClientException.ofHandler(NhgErrorHandler.NOT_VERIFIED);
         }
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
