@@ -9,6 +9,4 @@ import java.util.List;
 public interface VehicleRepository extends JpaRepository<Vehicle, String> {
     // Tìm tất cả xe còn AVAILABLE
     List<Vehicle> findByStatus(VehicleStatus status);
-
-    List<Vehicle> findByAvailableTrue();
 }

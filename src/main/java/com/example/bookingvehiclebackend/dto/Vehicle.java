@@ -1,53 +1,60 @@
 package com.example.bookingvehiclebackend.dto;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.time.Instant;
+
+@Getter
+@Setter
 @Entity
-@Table(name = "vehicle", schema = "bookingcar")
+@Table(name = "vehicles", schema = "bookingcar")
 public class Vehicle {
-    @Getter
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", nullable = false, length = 36)
+    @Column(name = "id", length = 100)
     private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
-    private User owner;
+    @Column(name = "owner_id", length = 100)
+    private String ownerId;
 
-    @Column(name = "brand", length = 100)
-    private String brand;
+    @Column(name = "vehicle_name", length = 100)
+    private String vehicleName;
 
-    @Column(name = "model", length = 100)
-    private String model;
+    @Column(name = "branch_id", length = 100)
+    private String branchId;
 
-    @Column(name = "license_plate", length = 20, unique = true)
-    private String licensePlate;
+    @Column(name = "category_id", length = 100)
+    private String categoryId; // Ví dụ: "SUV", "Sedan", "7 chỗ", ...
 
-    @Column(name = "type", length = 50)
-    private String type;
+    @Column(name = "fuel_type", length = 100)
+    private String fuelType; // Ví dụ: GASOLINE, DIESEL, ...
 
-    @Column(name = "transmission", length = 50)
-    private String transmission;
+    @Column(name = "seat_count")
+    private Integer seatCount;
+
+    @Column(name = "liecense_plate", length = 100)
+    private String liecensePlate;
 
     @Column(name = "price_per_day", precision = 10, scale = 2)
     private BigDecimal pricePerDay;
 
-    @Column(name = "available")
-    private boolean available;
+    @Lob
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "status", length = 100)
+    private String status; // AVAILABLE, RENTED, MAINTENANCE, HIDDEN
+
+    @Column(name = "image_url", length = 100)
+    private String imageUrl;
 
     @Column(name = "created_at")
     private Instant createdAt;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-
-    @Column(name = "image_url", length = 255)
-    @JsonProperty("imageUrl")
-    private String imageUrl;
+    @Column(name = "created_by", length = 100)
+    private String createdBy;
 
 }
