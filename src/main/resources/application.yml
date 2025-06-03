@@ -1,13 +1,15 @@
 cors:
   allowed-origins: "*"
   allowed-methods: "*"
+  allowed-headers: "*"
+  exposed-headers: "*"
 spring:
   application:
     name: booking-car
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/bookingcar
+    url: jdbc:mysql://127.0.0.1:3306/car_rental_system
     username: root
-    password: 123456
+    password: 22022001
 logging:
   level:
     org.springframework.security: TRACE

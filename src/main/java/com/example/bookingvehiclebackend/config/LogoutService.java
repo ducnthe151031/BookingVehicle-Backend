@@ -1,6 +1,6 @@
 package com.example.bookingvehiclebackend.config;
 
-import com.example.bookingvehiclebackend.repository.TokenRepository;
+import com.example.bookingvehiclebackend.v1.repository.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

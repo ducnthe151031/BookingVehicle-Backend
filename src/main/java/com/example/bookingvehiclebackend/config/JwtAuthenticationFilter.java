@@ -1,14 +1,13 @@
 package com.example.bookingvehiclebackend.config;
 
-import com.example.bookingvehiclebackend.dto.Token;
-import com.example.bookingvehiclebackend.repository.TokenRepository;
+import com.example.bookingvehiclebackend.v1.dto.Token;
+import com.example.bookingvehiclebackend.v1.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,12 +22,10 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    @Autowired
-    JwtService jwtService;
-    @Autowired
-    UserDetailsService userDetailsService;
-    @Autowired
-    TokenRepository tokenRepository;
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+    private final TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(
