@@ -1,6 +1,6 @@
 package com.example.bookingvehiclebackend.utils;
 
-import com.example.bookingvehiclebackend.exception.model.NhgError;
+import com.example.bookingvehiclebackend.v1.exception.model.NhgError;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 

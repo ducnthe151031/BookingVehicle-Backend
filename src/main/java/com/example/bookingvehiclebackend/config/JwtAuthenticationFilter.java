@@ -1,7 +1,7 @@
 package com.example.bookingvehiclebackend.config;
 
-import com.example.bookingvehiclebackend.dto.Token;
-import com.example.bookingvehiclebackend.repository.TokenRepository;
+import com.example.bookingvehiclebackend.v1.dto.Token;
+import com.example.bookingvehiclebackend.v1.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

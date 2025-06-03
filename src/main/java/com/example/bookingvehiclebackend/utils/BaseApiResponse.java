@@ -1,7 +1,7 @@
 package com.example.bookingvehiclebackend.utils;
 
 
-import com.example.bookingvehiclebackend.exception.INhgErrorHandler;
+import com.example.bookingvehiclebackend.v1.exception.INhgErrorHandler;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

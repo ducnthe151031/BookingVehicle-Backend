@@ -1,8 +1,8 @@
 package com.example.bookingvehiclebackend.config;
 
 
-import com.example.bookingvehiclebackend.dto.User;
-import com.example.bookingvehiclebackend.repository.UserRepository;
+import com.example.bookingvehiclebackend.v1.dto.User;
+import com.example.bookingvehiclebackend.v1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
