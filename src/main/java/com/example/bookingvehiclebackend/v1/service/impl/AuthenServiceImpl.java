@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.time.Instant;
 
@@ -72,9 +73,9 @@ public class AuthenServiceImpl implements AuthenService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw NhgClientException.ofHandler(NhgErrorHandler.USER_IS_EXISTED);
         }
-//        if(ObjectUtils.isEmpty(request.getEmail())){
-//            throw new RuntimeException("Email is required");
-//        }
+        if(ObjectUtils.isEmpty(request.getEmail())){
+            throw NhgClientException.ofHandler(NhgErrorHandler.EMAIL_NOT_FOUND);
+        }
 
         // Khi user dang ki chua xac thuc mail -> flagActive = INACTIVE
         User user = new User();
@@ -89,7 +90,7 @@ public class AuthenServiceImpl implements AuthenService {
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         // Sau khi dang ki thanh cong, can xac thuc qua email
-//        publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(httpSe-rvletRequest), jwtToken));
+//        publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(httpServletRequest), jwtToken));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(jwtToken);
         loginResponse.setRefreshToken(refreshToken);

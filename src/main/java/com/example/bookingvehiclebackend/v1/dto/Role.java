@@ -18,8 +18,7 @@ public enum Role {
     }
 
 
-
-    private final Set<Permission> permissions;
+    final Set<Permission> permissions;
 
     public Set<Permission> getPermissions() {
         return permissions;

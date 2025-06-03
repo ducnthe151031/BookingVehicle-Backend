@@ -18,7 +18,7 @@ public class RentalRequest {
     private String id;
 
     @Column(name = "customer_id", length = 100)
-    private String customerId;
+    private String customerId; // User có role = CUSTOMER
 
     @Column(name = "vehicle_id", length = 100)
     private String vehicleId;
@@ -30,13 +30,14 @@ public class RentalRequest {
     private Instant endDate;
 
     @Column(name = "status", length = 100)
-    private String status;
+    private String status;// PENDING, APPROVED, REJECTED, CANCELLED, COMPLETED
 
     @Column(name = "deposit_paid")
     private Boolean depositPaid;
 
     @Column(name = "total_price", precision = 10, scale = 2)
-    private BigDecimal totalPrice;
+    private BigDecimal totalPrice;// tính = pricePerDay * số ngày
+
 
     @Column(name = "late_fee", precision = 10, scale = 2)
     private BigDecimal lateFee;
