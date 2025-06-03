@@ -58,4 +58,6 @@ public class Vehicle {
     @Column(name = "created_by", length = 100)
     private String createdBy;
 
+    @Column(name = "vehicle_type_id", length = 100)
+    private Long vehicleTypeId;
 }
