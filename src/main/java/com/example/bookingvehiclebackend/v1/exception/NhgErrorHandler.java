@@ -20,11 +20,12 @@ public enum NhgErrorHandler implements INhgErrorHandler{
     NOT_VERIFIED("MEA000010", "common.apiResponse.notVerified"),
     USER_NOT_FOUND("MEA000011", "common.apiResponse.userNotFound" ),
     COURSE_NOT_FOUND("MEA000012", "common.apiResponse.courseNotFound"),
-    COURSE_ALREADY_EXISTED("MEA000013", "common.apiResponse.courseAlreadyExisted" ),;
+    COURSE_ALREADY_EXISTED("MEA000013", "common.apiResponse.courseAlreadyExisted"),
+    NOT_ALLOW_TO_CREATE_VEHICLE("MEA000014", "common.apiResponse.notAllowToCreateVehicle");
     private final String code;
     private final String message;
 
-     NhgErrorHandler(String code, String message) {
+    NhgErrorHandler(String code, String message) {
         this.code = code;
         this.message = message;
     }

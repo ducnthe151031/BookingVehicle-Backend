@@ -10,7 +10,12 @@ import java.util.stream.Collectors;
 //@RequiredArgsConstructor
 public enum Role {
     USER(Collections.emptySet()),
-    ADMIN(Collections.emptySet()),
+    ADMIN(Set.of(
+            Permission.ADMIN_READ,
+            Permission.ADMIN_UPDATE,
+            Permission.ADMIN_CREATE,
+            Permission.ADMIN_DELETE
+    )),
     OWNER(Collections.emptySet());
 
     Role(Set<Permission> permissions) {
@@ -18,7 +23,7 @@ public enum Role {
     }
 
 
-    final Set<Permission> permissions;
+    private final Set<Permission> permissions;
 
     public Set<Permission> getPermissions() {
         return permissions;

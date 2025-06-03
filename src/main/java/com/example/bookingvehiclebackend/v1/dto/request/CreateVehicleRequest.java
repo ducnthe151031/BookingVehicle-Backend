@@ -13,15 +13,32 @@ public class CreateVehicleRequest {
     private String location; // địa điểm xe đặt tại
     private Integer minimum_age; // Độ tuổi của xe
     private BigDecimal daily_price; // Giá thuê theo ngày
-    private BigDecimal deposit; // Tiền đặt cọc
     private String type; // Loại nhiên liệu: Diesel, Gasoline, Electric, Hybrid, Unknown
     private String gearbox; // Manual hoặc Automatic
-    private boolean aircon; // có điều hòa hay ko
     private Integer seats; // Số ghe ngồi
-    private Integer doors; // Số cửa xe
     private MultipartFile[] image; // Ảnh đại diện của xe
+    private String category;
+    private String brand;
+    private String licensePlate;
+    private String description;
 
     public CreateVehicleRequest() {
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLicensePlate() {
+        return licensePlate;
+    }
+
+    public void setLicensePlate(String licensePlate) {
+        this.licensePlate = licensePlate;
     }
 
     public String getName() {
@@ -56,13 +73,6 @@ public class CreateVehicleRequest {
         this.daily_price = daily_price;
     }
 
-    public BigDecimal getDeposit() {
-        return deposit;
-    }
-
-    public void setDeposit(BigDecimal deposit) {
-        this.deposit = deposit;
-    }
 
     public String getType() {
         return type;
@@ -80,13 +90,7 @@ public class CreateVehicleRequest {
         this.gearbox = gearbox;
     }
 
-    public boolean isAircon() {
-        return aircon;
-    }
 
-    public void setAircon(boolean aircon) {
-        this.aircon = aircon;
-    }
 
     public Integer getSeats() {
         return seats;
@@ -96,16 +100,24 @@ public class CreateVehicleRequest {
         this.seats = seats;
     }
 
-    public Integer getDoors() {
-        return doors;
-    }
-
-    public void setDoors(Integer doors) {
-        this.doors = doors;
-    }
-
     public MultipartFile[] getImage() {
         return image;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public void setImage(MultipartFile[] image) {
