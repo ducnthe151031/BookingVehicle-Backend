@@ -10,7 +10,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "rental_requests", schema = "car_rental_system")
+@Table(name = "rental_requests", schema = "bookingcar")
 public class RentalRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,14 +30,13 @@ public class RentalRequest {
     private Instant endDate;
 
     @Column(name = "status", length = 100)
-    private String status;// PENDING, APPROVED, REJECTED, CANCELLED, COMPLETED
+    private String status; // PENDING, APPROVED, REJECTED, CANCELLED, COMPLETED
 
     @Column(name = "deposit_paid")
     private Boolean depositPaid;
 
     @Column(name = "total_price", precision = 10, scale = 2)
-    private BigDecimal totalPrice;// tính = pricePerDay * số ngày
-
+    private BigDecimal totalPrice; // tính = pricePerDay * số ngày
 
     @Column(name = "late_fee", precision = 10, scale = 2)
     private BigDecimal lateFee;
