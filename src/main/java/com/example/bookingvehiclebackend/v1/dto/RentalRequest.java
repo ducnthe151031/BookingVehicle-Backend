@@ -6,11 +6,12 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "rental_requests", schema = "bookingcar")
+@Table(name = "rental_requests", schema = "car_rental_system")
 public class RentalRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,10 +25,10 @@ public class RentalRequest {
     private String vehicleId;
 
     @Column(name = "start_date")
-    private Instant startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "end_date")
-    private Instant endDate;
+    private LocalDateTime endDate;
 
     @Column(name = "status", length = 100)
     private String status; // PENDING, APPROVED, REJECTED, CANCELLED, COMPLETED
@@ -42,7 +43,7 @@ public class RentalRequest {
     private BigDecimal lateFee;
 
     @Column(name = "created_at")
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "created_by", length = 100)
     private String createdBy;

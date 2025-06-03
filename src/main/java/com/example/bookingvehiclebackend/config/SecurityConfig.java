@@ -1,11 +1,12 @@
 package com.example.bookingvehiclebackend.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,12 +22,12 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    @Autowired
-    AuthenticationProvider authenticationProvider;
-    @Autowired
-    JwtAuthenticationFilter jwtAuthFilter;
-    @Autowired
-    LogoutHandler logoutHandler;
+
+    private final AuthenticationProvider authenticationProvider;
+
+    private final com.example.bookingvehiclebackend.config.JwtAuthenticationFilter jwtAuthFilter;
+
+    private final LogoutHandler logoutHandler;
     private static final String[] WHITE_LIST_URL = {
             "v1/auth/**",
     };
@@ -34,10 +35,14 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .cors(Customizer.withDefaults()) // Cho phép sử dụng cấu hình CORS từ WebMvcConfig
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(WHITE_LIST_URL).permitAll();
+                    // Cho phép cả OWNER và ADMIN truy cập POST /v1/admin/cars
+                    auth.requestMatchers(HttpMethod.POST, "/v1/admin/cars").hasAnyRole("OWNER", "ADMIN");
                     auth.requestMatchers("v1/admin/**").hasRole("ADMIN");
+                    auth.requestMatchers("v1/user/**").hasRole("USER");
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))

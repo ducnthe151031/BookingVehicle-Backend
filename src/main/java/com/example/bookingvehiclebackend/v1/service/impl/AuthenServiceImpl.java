@@ -5,12 +5,13 @@ import com.example.bookingvehiclebackend.v1.dto.Token;
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
-import com.example.bookingvehiclebackend.v1.exception.NhgClientException;
-import com.example.bookingvehiclebackend.v1.exception.NhgErrorHandler;
+import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
+import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.TokenRepository;
 import com.example.bookingvehiclebackend.v1.repository.UserRepository;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,17 +22,18 @@ import org.springframework.util.ObjectUtils;
 import java.time.Instant;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenServiceImpl implements AuthenService {
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    JwtService jwtService;
-    @Autowired
-    TokenRepository tokenRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+
+    private final AuthenticationManager authenticationManager;
+
+    private final UserRepository userRepository;
+
+    private final JwtService jwtService;
+
+    private final TokenRepository tokenRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public LoginResponse login(AuthenRequest request) {
@@ -39,13 +41,13 @@ public class AuthenServiceImpl implements AuthenService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     request.getUsername(), request.getPassword()));
         } catch (Exception ex) {
-            throw NhgClientException.ofHandler(NhgErrorHandler.UNAUTHORIZED);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.UNAUTHORIZED);
         }
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(NhgClientException.supplier(NhgErrorHandler.UNAUTHORIZED));
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
 
         if (!"ACTIVE".equals(user.getFlagActive())) {
-            throw NhgClientException.ofHandler(NhgErrorHandler.NOT_VERIFIED);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_VERIFIED);
         }
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -71,10 +73,10 @@ public class AuthenServiceImpl implements AuthenService {
     @Override
     public LoginResponse register(AuthenRequest request, HttpServletRequest httpServletRequest) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw NhgClientException.ofHandler(NhgErrorHandler.USER_IS_EXISTED);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
         }
         if(ObjectUtils.isEmpty(request.getEmail())){
-            throw NhgClientException.ofHandler(NhgErrorHandler.EMAIL_NOT_FOUND);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
         }
 
         // Khi user dang ki chua xac thuc mail -> flagActive = INACTIVE

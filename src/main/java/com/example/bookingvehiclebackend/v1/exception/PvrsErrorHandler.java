@@ -4,7 +4,7 @@ package com.example.bookingvehiclebackend.v1.exception;
 import com.example.bookingvehiclebackend.utils.BeanUtils;
 import com.example.bookingvehiclebackend.utils.MessageUtils;
 
-public enum NhgErrorHandler implements INhgErrorHandler{
+public enum PvrsErrorHandler implements IPvrsErrorHandler {
     SYSTEM_ERROR("MEA0000011", "common.BaseApiResponse.systemError"),
     INVALID_INPUT("MEA000001", "common.apiResponse.invalidInput" ),
     UNAUTHORIZED("Unauthorized", "common.apiResponse.unauthorized"),
@@ -15,17 +15,19 @@ public enum NhgErrorHandler implements INhgErrorHandler{
     SEND_MAIL_ERROR("MEA000005", "common.apiResponse.sendMailError"),
     USER_IS_VERIFIED("MEA000006", "common.apiResponse.userIsVerified" ),
     INVALID_PASSWORD("MEA000007", "common.apiResponse.invalidPassword" ),
-    INVALID_ROLE("MEA000008","common.apiResponse.invalidRole" ),
     EMAIL_NOT_FOUND("MEA000009", "common.apiResponse.emailNotFound"),
     NOT_VERIFIED("MEA000010", "common.apiResponse.notVerified"),
     USER_NOT_FOUND("MEA000011", "common.apiResponse.userNotFound" ),
-    COURSE_NOT_FOUND("MEA000012", "common.apiResponse.courseNotFound"),
-    COURSE_ALREADY_EXISTED("MEA000013", "common.apiResponse.courseAlreadyExisted"),
-    NOT_ALLOW_TO_CREATE_VEHICLE("MEA000014", "common.apiResponse.notAllowToCreateVehicle");
+    NOT_ALLOW_TO_CREATE_VEHICLE("MEA000014", "common.apiResponse.notAllowToCreateVehicle"),
+    NOT_ALLOW_TO_BOOK_VEHICLE("MEA000015", "common.apiResponse.notAllowToBookVehicle"), VEHICLE_NOT_FOUND("MEA000016","common.apiResponse.vehicleNotFound"),
+    VEHICLE_UNAVAILABLE("MEA000017","common.apiResponse.vehicleUnavailable"),
+    VEHICLE_ALREADY_BOOKED("MEA000018","common.apiResponse.vehicleAlreadyBooked"),
+    RENTAL_TIME_OVER_0_DAY("MEA000019","common.apiResponse.rentalTimeOver0Day"),
+    BOOKING_IS_NOT_PENDING_STATUS("MEA000020", "common.apiResponse.bookingIsNotPendingStatus");
     private final String code;
     private final String message;
 
-    NhgErrorHandler(String code, String message) {
+    PvrsErrorHandler(String code, String message) {
         this.code = code;
         this.message = message;
     }

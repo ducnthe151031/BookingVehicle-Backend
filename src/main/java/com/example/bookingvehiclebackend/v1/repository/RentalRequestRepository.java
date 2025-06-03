@@ -20,7 +20,7 @@ public interface RentalRequestRepository extends JpaRepository<RentalRequest, St
               )
         """)
     List<RentalRequest> findOverlappingRequests(
-            @Param("vehicleId") Long vehicleId,
+            @Param("vehicleId") String vehicleId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
 }

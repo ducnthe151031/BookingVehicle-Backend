@@ -1,6 +1,8 @@
 package com.example.bookingvehiclebackend.v1.dto;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,7 +12,9 @@ import java.util.Collection;
 
 
 @Entity
-@Table(name = "user", schema = "bookingcar")
+@Table(name = "user", schema = "car_rental_system")
+@Getter
+@Setter
 public class User implements  UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,6 +42,15 @@ public class User implements  UserDetails {
     @ColumnDefault("'INACTIVE'")
     @Column(name = "flag_active", nullable = false, length = 100)
     private String flagActive;
+
+    @Column(name = "full_name", length = 100)
+    private String fullName;
+
+    @Column(name = "phone_number", length = 100)
+    private String phoneNumber;
+
+    @Column(name = "avartar_url", length = 100)
+    private String avartarUrl;
 
 
     @Override
@@ -72,61 +85,5 @@ public class User implements  UserDetails {
     @Override
     public String getPassword() {
         return password;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public String getFlagActive() {
-        return flagActive;
-    }
-
-    public void setFlagActive(String flagActive) {
-        this.flagActive = flagActive;
     }
 }

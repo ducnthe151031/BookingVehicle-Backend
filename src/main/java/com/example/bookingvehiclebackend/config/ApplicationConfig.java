@@ -3,7 +3,7 @@ package com.example.bookingvehiclebackend.config;
 
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,14 +15,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@RequiredArgsConstructor
 public class ApplicationConfig {
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            //                .orElseThrow(() -> NhgClientException.ofHandler(NhgErrorHandler.USERNAME_NOT_FOUND));
+
             return userRepository.findByUsername(username).orElse(new User());
         };
     }

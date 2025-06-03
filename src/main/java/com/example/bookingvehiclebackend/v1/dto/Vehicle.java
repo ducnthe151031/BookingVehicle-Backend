@@ -6,11 +6,12 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "vehicles", schema = "bookingcar")
+@Table(name = "vehicles", schema = "car_rental_system")
 public class Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -52,7 +53,7 @@ public class Vehicle {
     private String imageUrl;
 
     @Column(name = "created_at")
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "created_by", length = 100)
     private String createdBy;

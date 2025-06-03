@@ -1,6 +1,6 @@
 package com.example.bookingvehiclebackend.utils;
 
-import com.example.bookingvehiclebackend.v1.exception.model.NhgError;
+import com.example.bookingvehiclebackend.v1.exception.model.PvrsError;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
@@ -12,13 +12,13 @@ public class ErrorMappingUtils {
     private static final Map<String, HttpStatus> errorMap = new HashMap<>();
     private ErrorMappingUtils() {
     }
-    public static NhgError getError(String code) {
+    public static PvrsError getError(String code) {
         Optional<String> representativeCode = getRepresentativeCode(code);
         if (representativeCode.isEmpty()) {
-            return NhgError.http500Error();
+            return PvrsError.http500Error();
         } else {
             HttpStatus httpStatus = errorMap.getOrDefault(representativeCode.get(), HttpStatus.BAD_REQUEST);
-            return NhgError.valueOf(httpStatus, code, httpStatus.getReasonPhrase());
+            return PvrsError.valueOf(httpStatus, code, httpStatus.getReasonPhrase());
         }
     }
 

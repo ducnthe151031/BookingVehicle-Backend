@@ -1,14 +1,20 @@
 package com.example.bookingvehiclebackend.v1.dto;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-//@Getter
-//@Setter
+@Getter
+@Setter
 @Entity
-@Table(name = "token", schema = "bookingcar")
+@Table(name = "token", schema = "car_rental_system")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Token {
     @Id
     @Column(name = "id", nullable = false, length = 36)
@@ -36,60 +42,4 @@ public class Token {
 
     @Column(name = "token_type", length = 50)
     private String tokenType;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public Boolean getRevoked() {
-        return revoked;
-    }
-
-    public void setRevoked(Boolean revoked) {
-        this.revoked = revoked;
-    }
-
-    public Boolean getExpired() {
-        return expired;
-    }
-
-    public void setExpired(Boolean expired) {
-        this.expired = expired;
-    }
-
-    public String getTokenType() {
-        return tokenType;
-    }
-
-    public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
-    }
 }
