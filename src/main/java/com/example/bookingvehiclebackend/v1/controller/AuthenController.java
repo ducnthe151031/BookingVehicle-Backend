@@ -1,5 +1,6 @@
 package com.example.bookingvehiclebackend.v1.controller;
 
+import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
@@ -21,11 +22,11 @@ public class AuthenController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody AuthenRequest request) {
-      return ResponseEntity.ok(authenService.login(request));
+    public BaseApiResponse<LoginResponse> login(@RequestBody AuthenRequest request) {
+        return BaseApiResponse.succeed(authenService.login(request));
     }
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody AuthenRequest request, final HttpServletRequest httpServletRequest) {
-        return ResponseEntity.ok(authenService.register(request, httpServletRequest));
+    public BaseApiResponse<LoginResponse> register(@RequestBody AuthenRequest request, final HttpServletRequest httpServletRequest) {
+        return BaseApiResponse.succeed(authenService.register(request, httpServletRequest));
     }
 }
