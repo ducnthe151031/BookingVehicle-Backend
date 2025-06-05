@@ -7,7 +7,7 @@ spring:
   application:
     name: booking-car
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/bookingcar
+    url: jdbc:mysql://127.0.0.1:3306/car_rental_system
     username: root
     password: 123456
 logging:
