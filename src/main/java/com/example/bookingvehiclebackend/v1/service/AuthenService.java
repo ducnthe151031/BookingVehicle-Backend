@@ -10,4 +10,6 @@ public interface AuthenService {
     void saveUserToken(User user, String jwtToken);
 
     LoginResponse register(AuthenRequest request, HttpServletRequest httpServletRequest);
+
+    Object profile();
 }
