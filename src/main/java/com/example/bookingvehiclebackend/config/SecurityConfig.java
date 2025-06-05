@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;
 
-    private final com.example.bookingvehiclebackend.config.JwtAuthenticationFilter jwtAuthFilter;
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
     private final LogoutHandler logoutHandler;
     private static final String[] WHITE_LIST_URL = {
