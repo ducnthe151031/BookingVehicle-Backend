@@ -10,6 +10,7 @@ import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.TokenRepository;
 import com.example.bookingvehiclebackend.v1.repository.UserRepository;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
+import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +98,12 @@ public class AuthenServiceImpl implements AuthenService {
         loginResponse.setToken(jwtToken);
         loginResponse.setRefreshToken(refreshToken);
         return loginResponse;
+    }
+
+    @Override
+    public Object profile() {
+        return SecurityUtils.getCurrentUser()
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
     }
 
     private void revokeAllUserTokens(User user) {

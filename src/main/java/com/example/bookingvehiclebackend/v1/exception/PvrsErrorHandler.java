@@ -4,7 +4,7 @@ package com.example.bookingvehiclebackend.v1.exception;
 import com.example.bookingvehiclebackend.utils.BeanUtils;
 import com.example.bookingvehiclebackend.utils.MessageUtils;
 
-public enum PvrsErrorHandler implements IPvrsErrorHandler {
+public enum PvrsErrorHandler implements IPvrsErrorHandler{
     SYSTEM_ERROR("MEA0000011", "common.BaseApiResponse.systemError"),
     INVALID_INPUT("MEA000001", "common.apiResponse.invalidInput" ),
     UNAUTHORIZED("Unauthorized", "common.apiResponse.unauthorized"),
@@ -19,7 +19,8 @@ public enum PvrsErrorHandler implements IPvrsErrorHandler {
     NOT_VERIFIED("MEA000010", "common.apiResponse.notVerified"),
     USER_NOT_FOUND("MEA000011", "common.apiResponse.userNotFound" ),
     NOT_ALLOW_TO_CREATE_VEHICLE("MEA000014", "common.apiResponse.notAllowToCreateVehicle"),
-    NOT_ALLOW_TO_BOOK_VEHICLE("MEA000015", "common.apiResponse.notAllowToBookVehicle"), VEHICLE_NOT_FOUND("MEA000016","common.apiResponse.vehicleNotFound"),
+    NOT_ALLOW_TO_BOOK_VEHICLE("MEA000015", "common.apiResponse.notAllowToBookVehicle"),
+    VEHICLE_NOT_FOUND("MEA000016","common.apiResponse.vehicleNotFound"),
     VEHICLE_UNAVAILABLE("MEA000017","common.apiResponse.vehicleUnavailable"),
     VEHICLE_ALREADY_BOOKED("MEA000018","common.apiResponse.vehicleAlreadyBooked"),
     RENTAL_TIME_OVER_0_DAY("MEA000019","common.apiResponse.rentalTimeOver0Day"),
