@@ -30,16 +30,19 @@ public class UserServiceImpl implements UserService {
         if (!SecurityUtils.hasRole(Role.USER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
         }
+
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         Vehicle v = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         if (!Objects.equals(v.getStatus(), VehicleStatus.AVAILABLE.name())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_UNAVAILABLE);
         }
+
         List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(request.getVehicleId(), request.getStartDate(), request.getEndDate());
         if (!overlaps.isEmpty()) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);
         }
+
         RentalRequest rr = new RentalRequest();
         rr.setVehicleId(request.getVehicleId());
         rr.setCustomerId(user.getId());
@@ -50,10 +53,12 @@ public class UserServiceImpl implements UserService {
         rr.setCreatedAt(LocalDateTime.now());
         rr.setCreatedBy(user.getUsername());
         // Tính totalPrice = pricePerDay * số ngày (làm ví dụ đơn giản: 1 ngày = 24h)
+
         long daysBetween = ChronoUnit.DAYS.between(rr.getStartDate().toLocalDate(), rr.getEndDate().toLocalDate());
         if (daysBetween <= 0) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.RENTAL_TIME_OVER_0_DAY);
         }
+
         BigDecimal total = v.getPricePerDay().multiply(BigDecimal.valueOf(daysBetween));
         rr.setTotalPrice(total);
         return rentalRequestRepository.save(rr);
