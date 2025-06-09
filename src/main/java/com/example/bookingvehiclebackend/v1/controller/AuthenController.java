@@ -4,17 +4,20 @@ import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
+import com.example.bookingvehiclebackend.v1.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
-
+import java.io.IOException;
 @RestController
 @RequestMapping(value = "v1/auth", produces = APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class AuthenController {
     private final AuthenService authenService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public BaseApiResponse<LoginResponse> login(@RequestBody AuthenRequest request) {
@@ -30,7 +33,7 @@ public class AuthenController {
     // TODO CHANGE-PASSWORD
     @GetMapping("/profile")
     public BaseApiResponse<?> profile() {
-        return BaseApiResponse.succeed(authenService.profile());
+        return BaseApiResponse.succeed(userService.profile());
     }
 
     @PostMapping("/change-password")
