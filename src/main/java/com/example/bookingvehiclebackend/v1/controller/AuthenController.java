@@ -43,4 +43,17 @@ public class AuthenController {
     public BaseApiResponse<LoginResponse> forgotPassword(@RequestBody AuthenRequest request, final HttpServletRequest httpServletRequest) {
         return BaseApiResponse.succeed(authenService.forgotPassword(request,httpServletRequest));
     }
+
+    @GetMapping("/verify-email")
+    public BaseApiResponse<Void> verifyEmail(@RequestParam String token,
+                                             HttpServletResponse response) throws IOException {
+        String successful = authenService.verifyEmail(token);
+        if ("Successful".equals(successful)) {
+            response.sendRedirect("/verification-success.html");
+        } else {
+            response.sendRedirect("/verification-failed.html");
+        }
+
+        return BaseApiResponse.succeed();
+    }
 }
