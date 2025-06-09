@@ -1,5 +1,6 @@
 package com.example.bookingvehiclebackend.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +13,7 @@ import java.util.Collection;
 
 
 @Entity
-@Table(name = "user", schema = "car_rental_system")
+@Table(name = "user", schema = "bookingcar")
 @Getter
 @Setter
 public class User implements  UserDetails {
@@ -25,6 +26,7 @@ public class User implements  UserDetails {
     private String username;
 
     @Column(name = "password", length = 100)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column(name = "email", nullable = false, length = 100)

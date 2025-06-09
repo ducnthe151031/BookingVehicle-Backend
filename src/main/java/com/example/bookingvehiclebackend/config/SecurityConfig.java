@@ -41,6 +41,10 @@ public class SecurityConfig {
                     auth.requestMatchers(WHITE_LIST_URL).permitAll();
                     // Cho phép cả OWNER và ADMIN truy cập POST /v1/admin/cars
                     auth.requestMatchers(HttpMethod.POST, "/v1/admin/cars").hasAnyRole("OWNER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/v1/user/profile").hasAnyRole("OWNER", "ADMIN","USER");
+                    auth.requestMatchers(HttpMethod.POST, "/v1/user/change-password").hasAnyRole("OWNER", "ADMIN","USER");
+                    auth.requestMatchers(HttpMethod.POST, "/v1/user/forgot-password").hasAnyRole("OWNER", "ADMIN","USER");
+                    auth.requestMatchers(HttpMethod.GET, "/v1/user/verify-email").hasAnyRole("OWNER", "ADMIN","USER");
                     auth.requestMatchers("v1/admin/**").hasRole("ADMIN");
                     auth.requestMatchers("v1/user/**").hasRole("USER");
                     auth.anyRequest().authenticated();
