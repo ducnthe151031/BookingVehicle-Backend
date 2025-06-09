@@ -7,9 +7,21 @@ spring:
   application:
     name: booking-car
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/car_rental_system
+    url: jdbc:mysql://127.0.0.1:3306/bookingcar
     username: root
     password: 123456
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    #    thay = mail cua lap
+    username: btung548@gmail.com
+    password: wtpl thuu nomh hvua
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 logging:
   level:
     org.springframework.security: TRACE

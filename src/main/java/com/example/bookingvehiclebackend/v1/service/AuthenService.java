@@ -11,5 +11,10 @@ public interface AuthenService {
 
     LoginResponse register(AuthenRequest request, HttpServletRequest httpServletRequest);
 
-    Object profile();
+    void changePassword(AuthenRequest request);
+
+    LoginResponse forgotPassword(AuthenRequest request, HttpServletRequest httpServletRequest);
+
+    String verifyEmail(String token);
+
 }

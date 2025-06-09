@@ -63,4 +63,9 @@ public class UserServiceImpl implements UserService {
         rr.setTotalPrice(total);
         return rentalRequestRepository.save(rr);
     }
+    @Override
+    public Object profile() {
+        return SecurityUtils.getCurrentUser()
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+    }
 }
