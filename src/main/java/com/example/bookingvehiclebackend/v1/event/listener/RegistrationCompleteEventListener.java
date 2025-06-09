@@ -1,4 +1,4 @@
-package com.example.bookingvehiclebackend.v1.event;
+package com.example.bookingvehiclebackend.v1.event.listener;
 
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
@@ -22,7 +22,7 @@ import java.io.UnsupportedEncodingException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RegistrationCompleteEventListener {
+public class RegistrationCompleteEventListener  implements ApplicationListener<ApplicationEvent> {
     private final AuthenService authenService;
     private final JavaMailSender mailSender;
     User user;
@@ -60,6 +60,7 @@ public class RegistrationCompleteEventListener {
         }
         log.info("Click the link to reset your password: {}", url);
     }
+
     public void sendVerificationEmail(String url) throws MessagingException, UnsupportedEncodingException {
         String subject = "Email Verification";
         String senderName = "User Registration Portal Service";

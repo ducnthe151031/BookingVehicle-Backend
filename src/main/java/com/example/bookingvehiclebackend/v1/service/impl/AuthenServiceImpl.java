@@ -1,7 +1,6 @@
 package com.example.bookingvehiclebackend.v1.service.impl;
 
 import com.example.bookingvehiclebackend.config.JwtService;
-import com.example.bookingvehiclebackend.v1.dto.Role;
 import com.example.bookingvehiclebackend.v1.dto.Token;
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
@@ -14,16 +13,12 @@ import com.example.bookingvehiclebackend.v1.service.AuthenService;
 import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
-import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
-import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import java.time.Instant;
 import java.util.Objects;
