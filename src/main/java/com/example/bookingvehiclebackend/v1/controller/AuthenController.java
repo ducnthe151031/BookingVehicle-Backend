@@ -38,4 +38,9 @@ public class AuthenController {
         authenService.changePassword(request);
         return BaseApiResponse.succeed();
     }
+
+    @PostMapping("/forgot-password")
+    public BaseApiResponse<LoginResponse> forgotPassword(@RequestBody AuthenRequest request, final HttpServletRequest httpServletRequest) {
+        return BaseApiResponse.succeed(authenService.forgotPassword(request,httpServletRequest));
+    }
 }
