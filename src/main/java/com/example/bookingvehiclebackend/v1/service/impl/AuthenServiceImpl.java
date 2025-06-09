@@ -5,23 +5,22 @@ import com.example.bookingvehiclebackend.v1.dto.Token;
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
+import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.TokenRepository;
 import com.example.bookingvehiclebackend.v1.repository.UserRepository;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
-import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
-import org.springframework.context.ApplicationEventPublisher;
+
 import java.time.Instant;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,6 @@ public class AuthenServiceImpl implements AuthenService {
     private final TokenRepository tokenRepository;
 
     private final PasswordEncoder passwordEncoder;
-
     private final ApplicationEventPublisher publisher;
 
     @Override
@@ -79,7 +77,7 @@ public class AuthenServiceImpl implements AuthenService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
         }
-        if(ObjectUtils.isEmpty(request.getEmail())){
+        if (ObjectUtils.isEmpty(request.getEmail())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
         }
 
@@ -89,65 +87,22 @@ public class AuthenServiceImpl implements AuthenService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCreatedAt(Instant.now());
-        user.setFlagActive("ACTIVE");
-//        user.setFlagActive("INACTIVE");
+//        user.setFlagActive("ACTIVE");
+        user.setFlagActive("INACTIVE");
         user.setRole(request.getRole());
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         // Sau khi dang ki thanh cong, can xac thuc qua email
-//        publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(httpServletRequest), jwtToken));
+        publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(httpServletRequest), jwtToken));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(jwtToken);
         loginResponse.setRefreshToken(refreshToken);
         return loginResponse;
     }
 
-    @Override
-    public void changePassword(AuthenRequest request) {
-        User user = SecurityUtils.getCurrentUser()
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-        if (!Objects.equals(user.getEmail(), request.getEmail())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
-        }
-        if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-            userRepository.save(user);
-        } else {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.INVALID_PASSWORD);
-        }
-    }
-
-    @Override
-    public LoginResponse forgotPassword(AuthenRequest request, HttpServletRequest httpServletRequest) {
-        User user = SecurityUtils.getCurrentUser()
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-        if (!Objects.equals(user.getEmail(), request.getEmail())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
-        }
-        //Neu nhu dung email roi -> thu hoi token cua email hien tai
-        revokeAllUserTokens(user);
-        String newToken = jwtService.generateToken(user);
-        String resetUrl = "http://localhost:5173/forgotPassword?token=";
-        publisher.publishEvent(new PasswordResetEvent(user, resetUrl, newToken));
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setToken(newToken);
-        return loginResponse;
-    }
-
-    @Override
-    public String verifyEmail(String token) {
-        Token theToken = tokenRepository.findByAccessToken(token)
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
-        if ("ACTIVE".equals(theToken.getUser().getFlagActive())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_VERIFIED);
-        }
-        if (jwtService.isTokenValid(theToken.getAccessToken(), theToken.getUser())
-                && "INACTIVE".equals(theToken.getUser().getFlagActive())) {
-            theToken.getUser().setFlagActive("ACTIVE");
-            userRepository.save(theToken.getUser());
-        }
-        return "Successful";
+    public String applicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 
 
