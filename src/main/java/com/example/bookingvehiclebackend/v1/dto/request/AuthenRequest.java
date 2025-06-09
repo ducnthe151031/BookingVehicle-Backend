@@ -20,9 +20,6 @@ public class AuthenRequest {
     private String password;
     private Role role;
 
-    public AuthenRequest() {
-    }
-
     public String getUsername() {
         return username;
     }
