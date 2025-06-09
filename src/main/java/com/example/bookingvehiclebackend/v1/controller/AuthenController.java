@@ -32,8 +32,10 @@ public class AuthenController {
     public BaseApiResponse<?> profile() {
         return BaseApiResponse.succeed(authenService.profile());
     }
-//    @PutMapping("/profile")
-//    public BaseApiResponse<LoginResponse> updateProfile(@Path) {
-//        return BaseApiResponse.succeed(authenService.upProfile());
-//    }
+
+    @PostMapping("/change-password")
+    public BaseApiResponse<Void> changePassword(@RequestBody AuthenRequest request, final HttpServletRequest httpServletRequest) {
+        authenService.changePassword(request);
+        return BaseApiResponse.succeed();
+    }
 }
