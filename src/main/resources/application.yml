@@ -7,15 +7,15 @@ spring:
   application:
     name: booking-car
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/bookingcar
+    url: jdbc:mysql://127.0.0.1:3306/car_rental_system
     username: root
     password: 123456
   mail:
     host: smtp.gmail.com
     port: 587
     #    thay = mail cua lap
-    username: btung548@gmail.com
-    password: wtpl thuu nomh hvua
+    username: harutoryuoma@gmail.com
+    password: hieu123456789
     properties:
       mail:
         smtp:
