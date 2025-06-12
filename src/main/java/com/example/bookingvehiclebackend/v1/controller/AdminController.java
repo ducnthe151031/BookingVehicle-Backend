@@ -49,11 +49,22 @@ public class AdminController {
             @RequestParam(required = false) String status
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable,status));
+        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 
     @GetMapping("/brand-list")
     public BaseApiResponse<List<Brand>> getBrandList() {
         return BaseApiResponse.succeed(adminService.brandList());
     }
+
+    @GetMapping("/cars")
+    public BaseApiResponse<?> viewVehicle(@RequestBody CreateVehicleRequest request) {
+        return BaseApiResponse.succeed(adminService.viewVehicle(request.getId()));
+    }
+
+    @PutMapping("/cars")
+    public BaseApiResponse<?> updateVehicle(@RequestBody CreateVehicleRequest request) {
+        return BaseApiResponse.succeed(adminService.updateVehicle(request));
+    }
+
 }
