@@ -13,7 +13,7 @@ import java.util.Collection;
 
 
 @Entity
-@Table(name = "user", schema = "bookingcar")
+@Table(name = "user", schema = "car_rental_system")
 @Getter
 @Setter
 public class User implements  UserDetails {
@@ -53,6 +53,10 @@ public class User implements  UserDetails {
 
     @Column(name = "avartar_url", length = 100)
     private String avartarUrl;
+
+    @Column(name = "address", length = 100)
+    private String address;
+
 
 
     @Override

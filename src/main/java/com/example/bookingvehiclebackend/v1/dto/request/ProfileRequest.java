@@ -1,4 +1,4 @@
-package com.example.bookingcar.v1.dto.request;
+package com.example.bookingvehiclebackend.v1.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
