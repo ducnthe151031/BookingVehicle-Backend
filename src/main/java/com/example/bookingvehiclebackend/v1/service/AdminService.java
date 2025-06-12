@@ -2,6 +2,7 @@ package com.example.bookingvehiclebackend.v1.service;
 
 import com.example.bookingvehiclebackend.v1.dto.Brand;
 import com.example.bookingvehiclebackend.v1.dto.Category;
+import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -23,4 +24,8 @@ public interface AdminService {
     Object updateVehicle(CreateVehicleRequest request);
 
     void deleteVehicle(CreateVehicleRequest request);
+
+    Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
+
+    List<VehicleType> vehicleTypeList();
 }
