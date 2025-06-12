@@ -1,4 +1,4 @@
-package com.example.bookingvehiclebackend.v1.dto;
+package com.example.bookingvehiclebackend.v1.dto.demo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
