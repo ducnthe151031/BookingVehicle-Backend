@@ -44,6 +44,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/v1/user/profile").hasAnyRole("OWNER", "ADMIN","USER");
                     auth.requestMatchers(HttpMethod.POST, "/v1/user/change-password").hasAnyRole("OWNER", "ADMIN","USER");
                     auth.requestMatchers(HttpMethod.POST, "/v1/user/forgot-password").hasAnyRole("OWNER", "ADMIN","USER");
+                    auth.requestMatchers(HttpMethod.PUT, "/v1/user/profile").hasAnyRole("OWNER", "ADMIN","USER");
                     auth.requestMatchers(HttpMethod.GET, "/v1/user/verify-email").hasAnyRole("OWNER", "ADMIN","USER");
                     auth.requestMatchers("v1/admin/**").hasRole("ADMIN");
                     auth.requestMatchers("v1/user/**").hasRole("USER");
