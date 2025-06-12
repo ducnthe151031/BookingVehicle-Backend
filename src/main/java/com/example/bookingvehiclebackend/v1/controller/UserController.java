@@ -3,10 +3,9 @@ package com.example.bookingvehiclebackend.v1.controller;
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.BookingVehicleRequest;
-import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
+import com.example.bookingvehiclebackend.v1.dto.request.ProfileRequest;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
 import com.example.bookingvehiclebackend.v1.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -36,10 +35,7 @@ public class UserController {
         return BaseApiResponse.succeed();
     }
 
-    @PostMapping("/forgot-password")
-    public BaseApiResponse<LoginResponse> forgotPassword(@RequestBody AuthenRequest request, final HttpServletRequest httpServletRequest) {
-        return BaseApiResponse.succeed(userService.forgotPassword(request,httpServletRequest));
-    }
+
     @GetMapping("/verify-email")
     public BaseApiResponse<Void> verifyEmail(@RequestParam String token,
                                              HttpServletResponse response) throws IOException {
@@ -51,6 +47,10 @@ public class UserController {
         }
 
         return BaseApiResponse.succeed();
+    }
+    @PutMapping("/profile")
+    public BaseApiResponse<?> updateProfile(@RequestBody ProfileRequest profileRequest) {
+        return BaseApiResponse.succeed(userService.updateProfile(profileRequest));
     }
 
 }
