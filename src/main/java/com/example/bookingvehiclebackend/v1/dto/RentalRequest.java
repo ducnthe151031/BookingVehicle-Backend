@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "rental_requests", schema = "car_rental_system")
+@Table(name = "rental_requests", schema = "bookingcar")
 public class RentalRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,5 +47,13 @@ public class RentalRequest {
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
+    @Column(name = "approved_by", length = 100)
+    private String approved_by;
+    @Column(name = "brand_id", length = 100)
+    private String brandId;
+    @Column(name = "category_id", length = 100)
+    private String categoryId;
+    @Column(name = "rent_type", length = 100)
+    private String rentType;
 
 }
