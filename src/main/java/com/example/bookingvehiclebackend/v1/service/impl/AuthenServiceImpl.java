@@ -4,6 +4,7 @@ import com.example.bookingvehiclebackend.config.JwtService;
 import com.example.bookingvehiclebackend.v1.dto.Token;
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
+import com.example.bookingvehiclebackend.v1.dto.request.ProfileRequest;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
@@ -100,7 +101,6 @@ public class AuthenServiceImpl implements AuthenService {
         loginResponse.setRefreshToken(refreshToken);
         return loginResponse;
     }
-
     public String applicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }

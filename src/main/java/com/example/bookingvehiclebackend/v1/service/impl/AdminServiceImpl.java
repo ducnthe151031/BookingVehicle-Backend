@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -113,5 +114,25 @@ public class AdminServiceImpl implements AdminService {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         }, pageable);
+    }
+
+    @Override
+    public Object viewVehicle(String id) {
+        return  vehicleRepository.findById(id).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+    }
+
+    @Override
+    public Object updateVehicle(CreateVehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        vehicle.setVehicleName(request.getName());
+        vehicle.setPricePerDay(request.getDaily_price());
+        vehicle.setFuelType(request.getType());
+        vehicle.setSeatCount(request.getSeats());
+        vehicle.setImageUrl(Arrays.toString(request.getImage()));
+        vehicle.setCategoryId(request.getCategory());
+        vehicle.setBranchId(request.getBrand());
+        vehicle.setLiecensePlate(request.getLicensePlate());
+        vehicle.setDescription(request.getDescription());
+        return vehicleRepository.save(vehicle);
     }
 }

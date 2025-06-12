@@ -17,14 +17,15 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateVehicleRequest {
-    private String name;
-    private String location;
-    private Integer minimum_age;
-    private BigDecimal daily_price;
-    private String type;
-    private String gearbox;
-    private Integer seats;
-    private MultipartFile[] image;
+    private String id;
+    private String name; // tên xe
+    private String location; // địa điểm xe đặt tại // TODO
+    private Integer minimum_age; // Độ tuổi của xe // TODO
+    private BigDecimal daily_price; // Giá thuê theo ngày
+    private String type; // Loại nhiên liệu: Diesel, Gasoline, Electric, Hybrid, Unknown
+    private String gearbox; // Manual hoặc Automatic // TODO
+    private Integer seats; // Số ghe ngồi
+    private MultipartFile[] image; // Ảnh đại diện của xe
     private String category;
     private String brand;
     private String licensePlate;
