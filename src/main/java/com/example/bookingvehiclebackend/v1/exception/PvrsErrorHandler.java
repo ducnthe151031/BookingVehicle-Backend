@@ -24,7 +24,9 @@ public enum PvrsErrorHandler implements IPvrsErrorHandler{
     VEHICLE_UNAVAILABLE("MEA000017","common.apiResponse.vehicleUnavailable"),
     VEHICLE_ALREADY_BOOKED("MEA000018","common.apiResponse.vehicleAlreadyBooked"),
     RENTAL_TIME_OVER_0_DAY("MEA000019","common.apiResponse.rentalTimeOver0Day"),
-    BOOKING_IS_NOT_PENDING_STATUS("MEA000020", "common.apiResponse.bookingIsNotPendingStatus");
+    BOOKING_IS_NOT_PENDING_STATUS("MEA000020", "common.apiResponse.bookingIsNotPendingStatus"),
+    VEHICLE_EXISTED("MEA000021","common.apiResponse.vehicleExisted" ),
+    ;
     private final String code;
     private final String message;
 

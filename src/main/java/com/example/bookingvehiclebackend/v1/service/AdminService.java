@@ -17,4 +17,10 @@ public interface AdminService {
     Object approveBooking(String id);
 
     Object searchVehicles(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
+
+    Object viewVehicle(String id);
+
+    Object updateVehicle(CreateVehicleRequest request);
+
+    void deleteVehicle(CreateVehicleRequest request);
 }

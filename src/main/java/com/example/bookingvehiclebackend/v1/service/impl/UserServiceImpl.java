@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginResponse forgotPassword(AuthenRequest request, HttpServletRequest httpServletRequest) {
-        User user = SecurityUtils.getCurrentUser()
+        User user = userRepository.findByEmailAndUsername(request.getEmail(), request.getUsername())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         if (!Objects.equals(user.getEmail(), request.getEmail())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
