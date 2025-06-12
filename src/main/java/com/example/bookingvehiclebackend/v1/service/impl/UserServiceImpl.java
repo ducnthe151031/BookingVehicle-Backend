@@ -4,7 +4,6 @@ import com.example.bookingvehiclebackend.config.JwtService;
 import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.BookingVehicleRequest;
-import com.example.bookingvehiclebackend.v1.dto.request.ProfileRequest;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
 import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
@@ -100,8 +99,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginResponse forgotPassword(AuthenRequest request, HttpServletRequest httpServletRequest) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.EMAIL_NOT_FOUND));
+        User user = userRepository.findByEmailAndUsername(request.getEmail(), request.getUsername())
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+        if (!Objects.equals(user.getEmail(), request.getEmail())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
+        }
         //Neu nhu dung email roi -> thu hoi token cua email hien tai
         revokeAllUserTokens(user);
         String newToken = jwtService.generateToken(user);
@@ -126,18 +128,6 @@ public class UserServiceImpl implements UserService {
         }
         return "Successful";
     }
-
-    @Override
-    public Object updateProfile(ProfileRequest profileRequest) {
-        User user = SecurityUtils.getCurrentUser()
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-        user.setEmail(profileRequest.getEmail());
-        user.setUsername(profileRequest.getFirstName()+ " " + profileRequest.getLastName());
-        user.setPhoneNumber(profileRequest.getPhoneNumber());
-        user.setAddress(profileRequest.getAddress());
-        return userRepository.save(user);
-    }
-
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())

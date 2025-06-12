@@ -21,4 +21,6 @@ public interface AdminService {
     Object viewVehicle(String id);
 
     Object updateVehicle(CreateVehicleRequest request);
+
+    void deleteVehicle(CreateVehicleRequest request);
 }

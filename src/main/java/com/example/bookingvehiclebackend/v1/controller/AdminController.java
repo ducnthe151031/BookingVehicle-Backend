@@ -66,5 +66,9 @@ public class AdminController {
     public BaseApiResponse<?> updateVehicle(@RequestBody CreateVehicleRequest request) {
         return BaseApiResponse.succeed(adminService.updateVehicle(request));
     }
-
+    @DeleteMapping("/cars")
+    public BaseApiResponse<Void> deleteVehicle(@RequestBody CreateVehicleRequest request) {
+        adminService.deleteVehicle(request);
+        return BaseApiResponse.succeed();
+    }
 }

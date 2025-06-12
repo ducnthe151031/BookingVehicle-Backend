@@ -42,6 +42,9 @@ public class AdminServiceImpl implements AdminService {
         }
         User user = SecurityUtils.getCurrentUser()
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+        if (vehicleRepository.findByLiecensePlate(request.getLicensePlate()).isPresent()) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_EXISTED);
+        }
         Vehicle vehicle = new Vehicle();
         vehicle.setVehicleName(request.getName());
         vehicle.setBranchId(request.getBrand());
@@ -74,7 +77,7 @@ public class AdminServiceImpl implements AdminService {
     public Object approveBooking(String id) {
         RentalRequest booking = rentalRequestRepository.findById(id)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-        if(!RentalStatus.PENDING.name().equals(booking.getStatus())){
+        if (!RentalStatus.PENDING.name().equals(booking.getStatus())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
         }
         booking.setStatus(RentalStatus.APPROVED.name());
@@ -118,7 +121,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Object viewVehicle(String id) {
-        return  vehicleRepository.findById(id).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        return vehicleRepository.findById(id).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
     }
 
     @Override
@@ -134,5 +137,11 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setLiecensePlate(request.getLicensePlate());
         vehicle.setDescription(request.getDescription());
         return vehicleRepository.save(vehicle);
+    }
+
+    @Override
+    public void deleteVehicle(CreateVehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        vehicleRepository.delete(vehicle);
     }
 }
