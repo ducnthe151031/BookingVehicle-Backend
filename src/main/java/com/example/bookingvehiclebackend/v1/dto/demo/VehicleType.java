@@ -7,10 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "vehicle_type")
+
 public class VehicleType {
     @Id
     @Column(name = "id")

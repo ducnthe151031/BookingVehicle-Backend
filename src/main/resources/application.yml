@@ -9,13 +9,13 @@ spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/car_rental_system
     username: root
-    password: 123456
+    password: 22022001
   mail:
     host: smtp.gmail.com
     port: 587
-    #    thay = mail cua lap
-    username: harutoryuoma@gmail.com
-    password: hieu123456789
+
+    username: ducnthe151031@fpt.edu.vn
+    password: iakf mfbd pcmd jida
     properties:
       mail:
         smtp:
