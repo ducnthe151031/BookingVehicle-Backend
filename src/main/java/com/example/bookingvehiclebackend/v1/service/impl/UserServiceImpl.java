@@ -4,6 +4,7 @@ import com.example.bookingvehiclebackend.config.JwtService;
 import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.BookingVehicleRequest;
+import com.example.bookingvehiclebackend.v1.dto.request.ProfileRequest;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
 import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
@@ -45,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Object bookingVehicle(BookingVehicleRequest request) {
-        if (!SecurityUtils.hasRole(Role.USER)) {
+        if (SecurityUtils.hasRole(Role.OWNER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
         }
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
@@ -67,6 +68,9 @@ public class UserServiceImpl implements UserService {
         rr.setDepositPaid(request.isDepositPaid());
         rr.setCreatedAt(LocalDateTime.now());
         rr.setCreatedBy(user.getUsername());
+        rr.setBrandId(request.getBrandId());
+        rr.setCategoryId(request.getCategoryId());
+        rr.setRentType(request.getRentType());
         // Tính totalPrice = pricePerDay * số ngày (làm ví dụ đơn giản: 1 ngày = 24h)
         long daysBetween = ChronoUnit.DAYS.between(rr.getStartDate().toLocalDate(), rr.getEndDate().toLocalDate());
         if (daysBetween <= 0) {
@@ -100,10 +104,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public LoginResponse forgotPassword(AuthenRequest request, HttpServletRequest httpServletRequest) {
         User user = userRepository.findByEmailAndUsername(request.getEmail(), request.getUsername())
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-        if (!Objects.equals(user.getEmail(), request.getEmail())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
-        }
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.EMAIL_NOT_FOUND));
         //Neu nhu dung email roi -> thu hoi token cua email hien tai
         revokeAllUserTokens(user);
         String newToken = jwtService.generateToken(user);
@@ -128,6 +129,18 @@ public class UserServiceImpl implements UserService {
         }
         return "Successful";
     }
+
+    @Override
+    public Object updateProfile(ProfileRequest profileRequest) {
+        User user = SecurityUtils.getCurrentUser()
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+        user.setEmail(profileRequest.getEmail());
+        user.setUsername(profileRequest.getFirstName()+ " " + profileRequest.getLastName());
+        user.setPhoneNumber(profileRequest.getPhoneNumber());
+        user.setAddress(profileRequest.getAddress());
+        return userRepository.save(user);
+    }
+
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())
