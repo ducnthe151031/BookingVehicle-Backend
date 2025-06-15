@@ -1,21 +1,21 @@
 package com.example.bookingvehiclebackend.v1.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "vehicle_type")
+@Table(name = "vehicle_type", schema = "car_rental_system")
 public class VehicleType {
-    @Id
-    @Column(name = "id")
-    private Long id;
 
-    @Column(name = "type", length = 45)
-    private String type;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", length = 100)
+    private String id;
+
+    @Column(name = "type", length = 100)
+    private String type; // BIKE, CAR
+
 }

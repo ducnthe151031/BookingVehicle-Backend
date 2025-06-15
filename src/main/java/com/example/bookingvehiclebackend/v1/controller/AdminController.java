@@ -63,8 +63,10 @@ public class AdminController {
     public BaseApiResponse<List<Brand>> getBrandList() {
         return BaseApiResponse.succeed(adminService.brandList());
     }
-
     @PutMapping("/view")
+
+    @GetMapping("/cars")
+
     public BaseApiResponse<?> viewVehicle(@RequestBody CreateVehicleRequest request) {
         return BaseApiResponse.succeed(adminService.viewVehicle(request.getId()));
     }

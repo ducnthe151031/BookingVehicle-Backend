@@ -34,7 +34,6 @@ public class UserController {
         userService.changePassword(request);
         return BaseApiResponse.succeed();
     }
-
     @PostMapping("/reset-password")
     public BaseApiResponse<Void> resetPassword(@RequestParam String token,
                                                @RequestBody AuthenRequest changePasswordRequest,
@@ -42,6 +41,7 @@ public class UserController {
         userService.resetPassword(token, response, changePasswordRequest);
         return BaseApiResponse.succeed();
     }
+
 
     @GetMapping("/verify-email")
     public BaseApiResponse<Void> verifyEmail(@RequestParam String token,
@@ -54,6 +54,10 @@ public class UserController {
         }
 
         return BaseApiResponse.succeed();
+    }
+    @PutMapping("/profile")
+    public BaseApiResponse<?> updateProfile(@RequestBody ProfileRequest profileRequest) {
+        return BaseApiResponse.succeed(userService.updateProfile(profileRequest));
     }
 
 

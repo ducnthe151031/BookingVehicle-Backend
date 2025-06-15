@@ -18,5 +18,7 @@ public interface UserService {
 
     Object updateProfile(ProfileRequest profileRequest);
 
+
     void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest);
+
 }

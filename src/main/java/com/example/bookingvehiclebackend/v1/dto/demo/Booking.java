@@ -1,5 +1,7 @@
-package com.example.bookingvehiclebackend.v1.dto;
+package com.example.bookingvehiclebackend.v1.dto.demo;
 
+import com.example.bookingvehiclebackend.v1.dto.User;
+import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

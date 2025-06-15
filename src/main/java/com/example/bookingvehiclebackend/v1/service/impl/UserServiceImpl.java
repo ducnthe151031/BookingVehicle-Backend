@@ -136,7 +136,11 @@ public class UserServiceImpl implements UserService {
         User user = SecurityUtils.getCurrentUser()
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         user.setEmail(profileRequest.getEmail());
+
         user.setFullName(profileRequest.getFullName());
+
+        user.setUsername(profileRequest.getFirstName()+ " " + profileRequest.getLastName());
+
         user.setPhoneNumber(profileRequest.getPhoneNumber());
         user.setAddress(profileRequest.getAddress());
         return userRepository.save(user);
@@ -152,6 +156,7 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
     }
+
 
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());

@@ -47,6 +47,8 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/v1/user/verify-email").hasAnyRole("OWNER", "ADMIN", "USER");
                     auth.requestMatchers("v1/admin/**").hasAnyRole("ADMIN", "OWNER");
 //                    auth.requestMatchers("v1/user/**").hasRole("USER");
+                    auth.requestMatchers("v1/user/**").hasRole("USER");
+
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
