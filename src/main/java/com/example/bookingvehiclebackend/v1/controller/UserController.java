@@ -34,6 +34,13 @@ public class UserController {
         userService.changePassword(request);
         return BaseApiResponse.succeed();
     }
+    @PostMapping("/reset-password")
+    public BaseApiResponse<Void> resetPassword(@RequestParam String token,
+                                               @RequestBody AuthenRequest changePasswordRequest,
+                                               final HttpServletResponse response) {
+        userService.resetPassword(token, response, changePasswordRequest);
+        return BaseApiResponse.succeed();
+    }
 
 
     @GetMapping("/verify-email")
@@ -48,6 +55,13 @@ public class UserController {
 
         return BaseApiResponse.succeed();
     }
+    @PutMapping("/profile")
+    public BaseApiResponse<?> updateProfile(@RequestBody ProfileRequest profileRequest) {
+        return BaseApiResponse.succeed(userService.updateProfile(profileRequest));
+    }
+
+
+
     @PutMapping("/profile")
     public BaseApiResponse<?> updateProfile(@RequestBody ProfileRequest profileRequest) {
         return BaseApiResponse.succeed(userService.updateProfile(profileRequest));

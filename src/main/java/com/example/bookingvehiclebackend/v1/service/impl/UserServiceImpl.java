@@ -17,6 +17,7 @@ import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.UserService;
 import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -135,11 +136,27 @@ public class UserServiceImpl implements UserService {
         User user = SecurityUtils.getCurrentUser()
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         user.setEmail(profileRequest.getEmail());
+
+        user.setFullName(profileRequest.getFullName());
+
         user.setUsername(profileRequest.getFirstName()+ " " + profileRequest.getLastName());
+
         user.setPhoneNumber(profileRequest.getPhoneNumber());
         user.setAddress(profileRequest.getAddress());
         return userRepository.save(user);
     }
+
+    @Override
+    public void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest) {
+        Token theToken = tokenRepository.findByAccessToken(token)
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
+        if (theToken != null) {
+            User user = theToken.getUser();
+            user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+            userRepository.save(user);
+        }
+    }
+
 
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
