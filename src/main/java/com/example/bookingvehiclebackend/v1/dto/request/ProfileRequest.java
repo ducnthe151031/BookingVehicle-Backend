@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProfileRequest {
 
-    private String fullName
+    private String fullName;
     private String firstName;
     private String lastName;
 
