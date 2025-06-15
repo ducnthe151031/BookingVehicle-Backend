@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -59,5 +58,16 @@ public class Vehicle {
     private String createdBy;
 
     @Column(name = "vehicle_type_id", length = 100)
-    private Long vehicleTypeId;
+    private String vehicleTypeId;
+
+    @Column(name = "price_per_hour", length = 100)
+    private BigDecimal pricePerHour;
+
+    @Column(name = "gear_box", length = 100)
+    private String gearBox;
+
+    @Column(name = "location", length = 100)
+    private String location;
+
+
 }

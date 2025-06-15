@@ -3,6 +3,7 @@ package com.example.bookingvehiclebackend.v1.controller;
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.Brand;
 import com.example.bookingvehiclebackend.v1.dto.Category;
+import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 public class AdminController {
     private final AdminService adminService;
 
+    //test
     @PostMapping("/cars")
     public BaseApiResponse<?> createVehicle(@RequestBody CreateVehicleRequest request) {
         return BaseApiResponse.succeed(adminService.createVehicle(request));
@@ -36,6 +38,11 @@ public class AdminController {
     public BaseApiResponse<List<Category>> getCategoryList() {
         return BaseApiResponse.succeed(adminService.categoryList());
     }
+    @GetMapping("/vehicleType-list")
+    public BaseApiResponse<List<VehicleType>> getVehicleTypeList() {
+        return BaseApiResponse.succeed(adminService.vehicleTypeList());
+    }
+
 
     @GetMapping("/list")
     public BaseApiResponse<?> getVehicleList(
@@ -49,11 +56,40 @@ public class AdminController {
             @RequestParam(required = false) String status
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable,status));
+        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 
     @GetMapping("/brand-list")
     public BaseApiResponse<List<Brand>> getBrandList() {
         return BaseApiResponse.succeed(adminService.brandList());
+    }
+
+    @PutMapping("/view")
+    public BaseApiResponse<?> viewVehicle(@RequestBody CreateVehicleRequest request) {
+        return BaseApiResponse.succeed(adminService.viewVehicle(request.getId()));
+    }
+
+    @PutMapping("/cars")
+    public BaseApiResponse<?> updateVehicle(@RequestBody CreateVehicleRequest request) {
+        return BaseApiResponse.succeed(adminService.updateVehicle(request));
+    }
+    @DeleteMapping("/cars")
+    public BaseApiResponse<Void> deleteVehicle(@RequestBody CreateVehicleRequest request) {
+        adminService.deleteVehicle(request);
+        return BaseApiResponse.succeed();
+    }
+    @GetMapping("/rental-list")
+    public BaseApiResponse<?> getRentalList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) List<String> brands,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) String vehicleName,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) String status
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return BaseApiResponse.succeed(adminService.rentalList(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 }

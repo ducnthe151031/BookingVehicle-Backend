@@ -23,4 +23,7 @@ public class BookingVehicleRequest {
     private boolean depositPaid;
     private String description;
     private String licensePlate;
+    private String brandId;
+    private String categoryId;
+    private String rentType;
 }

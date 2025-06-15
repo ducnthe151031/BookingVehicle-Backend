@@ -54,6 +54,10 @@ public class User implements  UserDetails {
     @Column(name = "avartar_url", length = 100)
     private String avartarUrl;
 
+    @Column(name = "address", length = 100)
+    private String address;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

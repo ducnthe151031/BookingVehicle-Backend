@@ -4,15 +4,10 @@ import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
-import com.example.bookingvehiclebackend.v1.repository.BrandRepository;
-import com.example.bookingvehiclebackend.v1.repository.CategoryRepository;
-import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
-import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
+import com.example.bookingvehiclebackend.v1.repository.*;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +28,7 @@ public class AdminServiceImpl implements AdminService {
     private final VehicleRepository vehicleRepository;
 
     private final RentalRequestRepository rentalRequestRepository;
+    private final VehicleTypeRepository vehicleTypeRepository;
 
     @Override
     public Object createVehicle(CreateVehicleRequest request) {
@@ -41,13 +37,17 @@ public class AdminServiceImpl implements AdminService {
         }
         User user = SecurityUtils.getCurrentUser()
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+        if (vehicleRepository.findByLiecensePlate(request.getLicensePlate()).isPresent()) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_EXISTED);
+        }
         Vehicle vehicle = new Vehicle();
         vehicle.setVehicleName(request.getName());
         vehicle.setBranchId(request.getBrand());
         vehicle.setCategoryId(request.getCategory());
         vehicle.setFuelType(request.getType());
         vehicle.setSeatCount(request.getSeats());
-        vehicle.setPricePerDay(request.getDaily_price());
+        vehicle.setPricePerDay(request.getDailyPrice());
+        vehicle.setPricePerHour(request.getHourlyPrice());
         vehicle.setLiecensePlate(request.getLicensePlate());
         vehicle.setDescription(request.getDescription());
         vehicle.setStatus(VehicleStatus.AVAILABLE.name());
@@ -56,6 +56,9 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setCreatedBy(user.getUsername());
         vehicle.setCreatedAt(LocalDateTime.now());
         vehicle.setDescription(request.getDescription());
+        vehicle.setGearBox(request.getGearbox());
+        vehicle.setLocation(request.getLocation());
+        vehicle.setVehicleTypeId(request.getVehicleTypeId());
         return vehicleRepository.save(vehicle);
     }
 
@@ -73,7 +76,7 @@ public class AdminServiceImpl implements AdminService {
     public Object approveBooking(String id) {
         RentalRequest booking = rentalRequestRepository.findById(id)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-        if(!RentalStatus.PENDING.name().equals(booking.getStatus())){
+        if (!RentalStatus.PENDING.name().equals(booking.getStatus())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
         }
         booking.setStatus(RentalStatus.APPROVED.name());
@@ -97,21 +100,75 @@ public class AdminServiceImpl implements AdminService {
             if (StringUtils.hasText(status)) {
                 predicates.add(cb.equal(root.get("status"), status));
             }
-            // Giả sử bạn có bảng Booking (RentalRequest) và muốn lọc xe chưa được thuê trong khoảng này
-            if (startDate != null && endDate != null) {
-                Subquery<String> subquery = query.subquery(String.class);
-                Root<RentalRequest> rentalRoot = subquery.from(RentalRequest.class);
-                subquery.select(rentalRoot.get("vehicleId"));
-                subquery.where(
-                        cb.and(
-                                cb.lessThan(rentalRoot.get("startDate"), endDate),
-                                cb.greaterThan(rentalRoot.get("endDate"), startDate)
-                        )
-                );
-                predicates.add(cb.not(root.get("id").in(subquery)));
-            }
-
             return cb.and(predicates.toArray(new Predicate[0]));
         }, pageable);
+    }
+
+    @Override
+    public Object viewVehicle(String id) {
+        return vehicleRepository.findById(id).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+    }
+
+    @Override
+    public Object updateVehicle(CreateVehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        vehicle.setVehicleName(request.getName());
+        vehicle.setBranchId(request.getBrand());
+        vehicle.setCategoryId(request.getCategory());
+        vehicle.setFuelType(request.getType());
+        vehicle.setSeatCount(request.getSeats());
+        vehicle.setPricePerDay(request.getDailyPrice());
+        vehicle.setPricePerHour(request.getHourlyPrice());
+        vehicle.setLiecensePlate(request.getLicensePlate());
+        vehicle.setDescription(request.getDescription());
+        vehicle.setStatus(VehicleStatus.AVAILABLE.name());
+        vehicle.setLiecensePlate(request.getLicensePlate());
+        vehicle.setCreatedAt(LocalDateTime.now());
+        vehicle.setDescription(request.getDescription());
+        vehicle.setGearBox(request.getGearbox());
+        vehicle.setLocation(request.getLocation());
+        vehicle.setVehicleTypeId(request.getVehicleTypeId());
+        return vehicleRepository.save(vehicle);
+    }
+
+    @Override
+    public void deleteVehicle(CreateVehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        vehicleRepository.delete(vehicle);
+    }
+
+    @Override
+    public Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
+        return rentalRequestRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (brands != null && !brands.isEmpty()) {
+                predicates.add(root.get("brandId").in(brands));
+            }
+            if (categories != null && !categories.isEmpty()) {
+                predicates.add(root.get("categoryId").in(categories));
+            }
+            if (StringUtils.hasText(vehicleName)) {
+                predicates.add(cb.like(cb.lower(root.get("vehicleName")), "%" + vehicleName.toLowerCase() + "%"));
+            }
+            if (StringUtils.hasText(status)) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            if (startDate != null && endDate != null) {
+                // Điều kiện khoảng thời gian giao nhau
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), endDate));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), startDate));
+            } else if (startDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("endDate"), startDate));
+            } else if (endDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), endDate));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable);
+    }
+
+    @Override
+    public List<VehicleType> vehicleTypeList() {
+        return vehicleTypeRepository.findAll();
     }
 }

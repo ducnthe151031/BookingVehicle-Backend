@@ -1,14 +1,16 @@
 package com.example.bookingvehiclebackend.v1.repository;
 
 import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
+import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface RentalRequestRepository extends JpaRepository<RentalRequest, String> {
+public interface RentalRequestRepository extends JpaRepository<RentalRequest, String>, JpaSpecificationExecutor<Vehicle> {
     // Kiểm tra xem xe đã có booking nào chưa vào khoảng thời gian
     @Query("""
         SELECT rr 
