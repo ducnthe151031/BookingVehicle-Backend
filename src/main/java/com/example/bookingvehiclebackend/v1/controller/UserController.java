@@ -62,9 +62,4 @@ public class UserController {
 
 
 
-    @PutMapping("/profile")
-    public BaseApiResponse<?> updateProfile(@RequestBody ProfileRequest profileRequest) {
-        return BaseApiResponse.succeed(userService.updateProfile(profileRequest));
-    }
-
 }
