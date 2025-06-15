@@ -59,7 +59,4 @@ public class UserController {
     public BaseApiResponse<?> updateProfile(@RequestBody ProfileRequest profileRequest) {
         return BaseApiResponse.succeed(userService.updateProfile(profileRequest));
     }
-
-
-
 }
