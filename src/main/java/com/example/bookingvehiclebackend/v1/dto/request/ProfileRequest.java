@@ -10,11 +10,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileRequest {
-
     private String fullName;
     private String firstName;
     private String lastName;
-
     private String email;
     private String phoneNumber;
     private String address;

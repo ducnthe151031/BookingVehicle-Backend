@@ -39,7 +39,7 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
         user = event.getUser();
         String jwtToken = event.getJwtToken();
         authenService.saveUserToken(user, jwtToken);
-        String url = event.getApplicationUrl() + "/v1/auth/verify-email?token=" + jwtToken;
+        String url = event.getApplicationUrl() + "/v1/user/verify-email?token=" + jwtToken; ///v1/path/verify-email
         try {
             sendVerificationEmail(url);
         } catch (MessagingException | UnsupportedEncodingException e) {
@@ -72,8 +72,6 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
         MimeMessage message = mailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message);
 
-        messageHelper.setFrom("hieunmhe170629@fpt.edu.vn", senderName); //set = mail cua minh
-
         messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName); //set = mail cua minh
 
         messageHelper.setTo(user.getEmail());
@@ -94,7 +92,6 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message);
 
-        messageHelper.setFrom("hieunmhe170629@fpt.edu.vn", senderName);
 
         messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName);
 

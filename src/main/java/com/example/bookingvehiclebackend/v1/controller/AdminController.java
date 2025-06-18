@@ -63,10 +63,9 @@ public class AdminController {
     public BaseApiResponse<List<Brand>> getBrandList() {
         return BaseApiResponse.succeed(adminService.brandList());
     }
-    @PutMapping("/view")
 
     @GetMapping("/cars")
-
+    @PutMapping("/view")
     public BaseApiResponse<?> viewVehicle(@RequestBody CreateVehicleRequest request) {
         return BaseApiResponse.succeed(adminService.viewVehicle(request.getId()));
     }
@@ -95,3 +94,4 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.rentalList(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 }
+
