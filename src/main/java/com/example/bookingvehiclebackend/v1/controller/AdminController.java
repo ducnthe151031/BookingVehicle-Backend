@@ -33,6 +33,10 @@ public class AdminController {
     public BaseApiResponse<?> approveBooking(@PathVariable String id) {
         return BaseApiResponse.succeed(adminService.approveBooking(id));
     }
+    @PutMapping("/reject-booking/{id}")
+    public BaseApiResponse<?> rejectBooking(@PathVariable String id) {
+        return BaseApiResponse.succeed(adminService.rejectBooking(id));
+    }
 
     @GetMapping("/category-list")
     public BaseApiResponse<List<Category>> getCategoryList() {
@@ -64,7 +68,6 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.brandList());
     }
 
-    @GetMapping("/cars")
     @PutMapping("/view")
     public BaseApiResponse<?> viewVehicle(@RequestBody CreateVehicleRequest request) {
         return BaseApiResponse.succeed(adminService.viewVehicle(request.getId()));
@@ -94,4 +97,3 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.rentalList(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 }
-

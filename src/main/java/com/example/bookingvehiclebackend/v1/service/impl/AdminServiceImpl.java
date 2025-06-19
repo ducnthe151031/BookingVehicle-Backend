@@ -171,4 +171,15 @@ public class AdminServiceImpl implements AdminService {
     public List<VehicleType> vehicleTypeList() {
         return vehicleTypeRepository.findAll();
     }
+
+    @Override
+    public Object rejectBooking(String id) {
+        RentalRequest booking = rentalRequestRepository.findById(id)
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        if (!RentalStatus.PENDING.name().equals(booking.getStatus())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
+        }
+        booking.setStatus(RentalStatus.REJECTED.name());
+        return rentalRequestRepository.save(booking);
+    }
 }

@@ -28,4 +28,6 @@ public interface AdminService {
     Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
 
     List<VehicleType> vehicleTypeList();
+
+    Object rejectBooking(String id);
 }
