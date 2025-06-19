@@ -7,6 +7,8 @@ import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+
 public interface UserService {
     Object bookingVehicle(BookingVehicleRequest request);
     Object profile();
@@ -16,9 +18,7 @@ public interface UserService {
 
     String verifyEmail(String token);
 
-    Object updateProfile(ProfileRequest profileRequest);
-
+    Object updateProfile(ProfileRequest profileRequest) throws IOException;
 
     void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest);
-
 }
