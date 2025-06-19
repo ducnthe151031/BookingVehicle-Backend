@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface UserService {
-    Object bookingVehicle(BookingVehicleRequest request);
+    Object bookingVehicle(BookingVehicleRequest request) throws Exception;
     Object profile();
     void changePassword(AuthenRequest request);
 
@@ -22,3 +22,4 @@ public interface UserService {
 
     void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest);
 }
+

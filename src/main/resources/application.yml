@@ -8,11 +8,11 @@ cors:
   exposed-headers: "*"
 spring:
   application:
-    name: booking-car
+    name: booking-vehicle
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/car_rental_system
+    url: jdbc:mysql://127.0.0.1:3306/vehicle_rental_system
     username: root
-    password: 123456
+    password: 22022001
   mail:
     host: smtp.gmail.com
     port: 587
