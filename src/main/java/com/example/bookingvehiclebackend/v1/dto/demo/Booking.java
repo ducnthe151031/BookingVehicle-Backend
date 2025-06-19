@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "booking", schema = "car_rental_system")
+@Table(name = "booking", schema = "vehicle_rental_system")
 public class Booking {
     @Getter
     @Setter

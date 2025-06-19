@@ -28,4 +28,5 @@ public class BookingVehicleRequest {
     private String categoryId;
     private String rentType;
     private BigDecimal totalPrice;
+    private String url ;
 }
