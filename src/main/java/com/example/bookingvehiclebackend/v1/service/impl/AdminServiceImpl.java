@@ -8,8 +8,14 @@ import com.example.bookingvehiclebackend.v1.repository.*;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -35,6 +41,9 @@ public class AdminServiceImpl implements AdminService {
 
     private final RentalRequestRepository rentalRequestRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public Object createVehicle(CreateVehicleRequest request) throws IOException {
@@ -130,23 +139,72 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Object searchVehicles(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
-        return vehicleRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+        Specification<Vehicle> spec = new Specification<Vehicle>() {
+            @Override
+            public Predicate toPredicate(Root<Vehicle> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                List<Predicate> predicates = new ArrayList<>();
 
-            if (brands != null && !brands.isEmpty()) {
-                predicates.add(root.get("branchId").in(brands));
+                // Subquery để kiểm tra xung đột thời gian
+                Subquery<String> subquery = query.subquery(String.class);
+                Root<RentalRequest> rentalRequestRoot = subquery.from(RentalRequest.class);
+                subquery.select(rentalRequestRoot.get("vehicleId"));
+
+                // Sử dụng giá trị startDate và endDate trực tiếp thay vì tham số
+                if (startDate != null && endDate != null) {
+                    subquery.where(cb.and(
+                            cb.equal(rentalRequestRoot.get("vehicleId"), root.get("id")),
+                            cb.or(
+                                    // Xung đột khi startDate nằm trong khoảng đã thuê
+                                    cb.and(
+                                            cb.greaterThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("startDate")),
+                                            cb.lessThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("endDate"))
+                                    ),
+                                    // Xung đột khi endDate nằm trong khoảng đã thuê
+                                    cb.and(
+                                            cb.greaterThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("startDate")),
+                                            cb.lessThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("endDate"))
+                                    ),
+                                    // Xung đột khi khoảng thời gian bao phủ toàn bộ khoảng đã thuê
+                                    cb.and(
+                                            cb.lessThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("startDate")),
+                                            cb.greaterThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("endDate"))
+                                    )
+                            ),
+                            cb.notEqual(rentalRequestRoot.get("status"), "CANCELLED") // Loại bỏ các yêu cầu đã hủy
+                    ));
+                } else {
+                    // Nếu không có startDate hoặc endDate, không áp dụng điều kiện thời gian
+                    subquery.where(cb.and(
+                            cb.equal(rentalRequestRoot.get("vehicleId"), root.get("id")),
+                            cb.notEqual(rentalRequestRoot.get("status"), "CANCELLED")
+                    ));
+                }
+
+                // Điều kiện cơ bản
+                if (brands != null && !brands.isEmpty()) {
+                    predicates.add(root.get("branchId").in(brands));
+                }
+                if (categories != null && !categories.isEmpty()) {
+                    predicates.add(root.get("categoryId").in(categories));
+                }
+                if (StringUtils.hasText(vehicleName)) {
+                    predicates.add(cb.like(cb.lower(root.get("vehicleName")), "%" + vehicleName.toLowerCase() + "%"));
+                }
+                if (StringUtils.hasText(status)) {
+                    predicates.add(cb.equal(root.get("status"), status));
+                }
+
+                // Thêm điều kiện không có xung đột thời gian
+                if (startDate != null && endDate != null) {
+                    predicates.add(cb.not(root.get("id").in(subquery)));
+                }
+
+                return cb.and(predicates.toArray(new Predicate[0]));
             }
-            if (categories != null && !categories.isEmpty()) {
-                predicates.add(root.get("categoryId").in(categories));
-            }
-            if (StringUtils.hasText(vehicleName)) {
-                predicates.add(cb.like(cb.lower(root.get("vehicleName")), "%" + vehicleName.toLowerCase() + "%"));
-            }
-            if (StringUtils.hasText(status)) {
-                predicates.add(cb.equal(root.get("status"), status));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        }, pageable);
+        };
+
+        Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
+        return page;
     }
 
     @Override

@@ -23,6 +23,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import vn.payos.PayOS;
+import vn.payos.type.PaymentData;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -52,161 +54,176 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Object bookingVehicle(BookingVehicleRequest request) {
-        if (!SecurityUtils.hasRole(Role.USER)) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
+        public Object bookingVehicle(BookingVehicleRequest request) throws Exception {
+            if (!SecurityUtils.hasRole(Role.USER)) {
+                throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
+            }
+            User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+            Vehicle v = vehicleRepository.findById(request.getVehicleId())
+                    .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+//            if (!Objects.equals(v.getStatus(), VehicleStatus.AVAILABLE.name())) {
+//                throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_UNAVAILABLE);
+//            }
+            List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(request.getVehicleId(), request.getStartDate(), request.getEndDate());
+            if (!overlaps.isEmpty()) {
+                throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);
+            }
+            RentalRequest rr = new RentalRequest();
+            rr.setVehicleId(request.getVehicleId());
+            rr.setCustomerId(user.getId());
+            rr.setStartDate(request.getStartDate());
+            rr.setEndDate(request.getEndDate());
+            rr.setStatus(RentalStatus.PENDING.name());
+            rr.setDepositPaid(request.isDepositPaid());
+            rr.setCreatedAt(LocalDateTime.now());
+            rr.setCreatedBy(user.getUsername());
+            rr.setBrandId(request.getBrandId());
+            rr.setCategoryId(request.getCategoryId());
+            rr.setRentType(request.getRentType());
+            rr.setTotalPrice(request.getTotalPrice());
+            rr.setPaymentStatus(false);
+            long orderCode = System.currentTimeMillis();
+            rr.setOrderCode(orderCode);
+            int totalPrice = request.getTotalPrice().intValue();
+            PayOS payOS = new PayOS("65f3da88-9fa3-4ef3-8a5d-9393a14d3b84","c0473543-c34c-4601-8f23-88fc7fec2645","f3d3ea900cf6dd94e57b86b3c09ae3946ab397569ea3a930559a1c2a0797f25f") ;
+            PaymentData paymentData = PaymentData.builder()
+                    .orderCode(orderCode)
+                    .amount(totalPrice)
+                    .description(user.getUsername())
+                    .returnUrl("http://localhost:8080/v1/user/payment/success?orderCode=" + orderCode) // URL cụ thể
+                    .cancelUrl("http://localhost:5173/home") // Quay về home
+                    .build();
+            rr.setUrl(payOS.createPaymentLink(paymentData).getCheckoutUrl());
+            v.setStatus("PENDING");
+
+            return rentalRequestRepository.save(rr);
         }
-        User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-        Vehicle v = vehicleRepository.findById(request.getVehicleId())
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-        if (!Objects.equals(v.getStatus(), VehicleStatus.AVAILABLE.name())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_UNAVAILABLE);
+        @Override
+        public Object profile() {
+            return SecurityUtils.getCurrentUser()
+                    .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         }
-        List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(request.getVehicleId(), request.getStartDate(), request.getEndDate());
-        if (!overlaps.isEmpty()) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);
-        }
-        RentalRequest rr = new RentalRequest();
-        rr.setVehicleId(request.getVehicleId());
-        rr.setCustomerId(user.getId());
-        rr.setStartDate(request.getStartDate());
-        rr.setEndDate(request.getEndDate());
-        rr.setStatus(RentalStatus.PENDING.name());
-        rr.setDepositPaid(request.isDepositPaid());
-        rr.setCreatedAt(LocalDateTime.now());
-        rr.setCreatedBy(user.getUsername());
-        rr.setBrandId(request.getBrandId());
-        rr.setCategoryId(request.getCategoryId());
-        rr.setRentType(request.getRentType());
-        rr.setTotalPrice(request.getTotalPrice());
-        v.setStatus("PENDING");
-        return rentalRequestRepository.save(rr);
-    }
-    @Override
-    public Object profile() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-    }
 
-    @Override
-    public void changePassword(AuthenRequest request) {
-        User user = SecurityUtils.getCurrentUser()
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-        if (!Objects.equals(user.getEmail(), request.getEmail())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
-        }
-        if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-            userRepository.save(user);
-        } else {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.INVALID_PASSWORD);
-        }
-    }
-
-    @Override
-    public LoginResponse forgotPassword(AuthenRequest request, HttpServletRequest httpServletRequest) {
-        User user = userRepository.findByEmailAndUsername(request.getEmail(), request.getUsername())
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.EMAIL_NOT_FOUND));
-        //Neu nhu dung email roi -> thu hoi token cua email hien tai
-        revokeAllUserTokens(user);
-        String newToken = jwtService.generateToken(user);
-        String resetUrl = "http://localhost:5173/forgotPassword?token=";
-        publisher.publishEvent(new PasswordResetEvent(user, resetUrl, newToken));
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setToken(newToken);
-        return loginResponse;
-    }
-
-    @Override
-    public String verifyEmail(String token) {
-        Token theToken = tokenRepository.findByAccessToken(token)
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
-        if ("ACTIVE".equals(theToken.getUser().getFlagActive())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_VERIFIED);
-        }
-        if (jwtService.isTokenValid(theToken.getAccessToken(), theToken.getUser())
-                && "INACTIVE".equals(theToken.getUser().getFlagActive())) {
-            theToken.getUser().setFlagActive("ACTIVE");
-            userRepository.save(theToken.getUser());
-        }
-        return "Successful";
-    }
-
-    @Override
-    public Object updateProfile(ProfileRequest profileRequest) throws IOException {
-        User user = SecurityUtils.getCurrentUser()
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
-        user.setEmail(profileRequest.getEmail());
-        user.setFullName(profileRequest.getFullName());
-        user.setPhoneNumber(profileRequest.getPhoneNumber());
-        user.setAddress(profileRequest.getAddress());
-
-
-
-        if (profileRequest.getDriverLicenseUrl() != null && !profileRequest.getDriverLicenseUrl().isEmpty()) {
-            try {
-                byte[] driverLicenseUrl = Base64.getDecoder().decode(profileRequest.getDriverLicenseUrl());
-                String driverLicenseUrlName = saveImageToFileSystem(driverLicenseUrl); // Lưu ảnh và lấy đường dẫn
-                user.setDriverLicenseUrl(driverLicenseUrlName);
-
-            } catch (IllegalArgumentException e)
-            {
-                user.setDriverLicenseUrl(profileRequest.getDriverLicenseUrl());
-
+        @Override
+        public void changePassword(AuthenRequest request) {
+            User user = SecurityUtils.getCurrentUser()
+                    .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+            if (!Objects.equals(user.getEmail(), request.getEmail())) {
+                throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
+            }
+            if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
+            } else {
+                throw PvrsClientException.ofHandler(PvrsErrorHandler.INVALID_PASSWORD);
             }
         }
 
+        @Override
+        public LoginResponse forgotPassword(AuthenRequest request, HttpServletRequest httpServletRequest) {
+            User user = userRepository.findByEmailAndUsername(request.getEmail(), request.getUsername())
+                    .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.EMAIL_NOT_FOUND));
+            //Neu nhu dung email roi -> thu hoi token cua email hien tai
+            revokeAllUserTokens(user);
+            String newToken = jwtService.generateToken(user);
+            String resetUrl = "http://localhost:5173/forgotPassword?token=";
+            publisher.publishEvent(new PasswordResetEvent(user, resetUrl, newToken));
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setToken(newToken);
+            return loginResponse;
+        }
 
-        if (profileRequest.getCitizenIdCardUrl() != null && !profileRequest.getCitizenIdCardUrl().isEmpty()) {
-            try {
-                byte[] citizenIdCardUrl = Base64.getDecoder().decode(profileRequest.getCitizenIdCardUrl());
-                String citizenIdCardUrlName = saveImageToFileSystem(citizenIdCardUrl); // Lưu ảnh và lấy đường dẫn
-                user.setCitizenIdCardUrl(citizenIdCardUrlName);
+        @Override
+        public String verifyEmail(String token) {
+            Token theToken = tokenRepository.findByAccessToken(token)
+                    .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
+            if ("ACTIVE".equals(theToken.getUser().getFlagActive())) {
+                throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_VERIFIED);
+            }
+            if (jwtService.isTokenValid(theToken.getAccessToken(), theToken.getUser())
+                    && "INACTIVE".equals(theToken.getUser().getFlagActive())) {
+                theToken.getUser().setFlagActive("ACTIVE");
+                userRepository.save(theToken.getUser());
+            }
+            return "Successful";
+        }
 
-            } catch (IllegalArgumentException e)
-            {
-                user.setCitizenIdCardUrl(profileRequest.getCitizenIdCardUrl());
+        @Override
+        public Object updateProfile(ProfileRequest profileRequest) throws IOException {
+            User user = SecurityUtils.getCurrentUser()
+                    .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+            user.setEmail(profileRequest.getEmail());
+            user.setFullName(profileRequest.getFullName());
+            user.setPhoneNumber(profileRequest.getPhoneNumber());
+            user.setAddress(profileRequest.getAddress());
 
+
+
+            if (profileRequest.getDriverLicenseUrl() != null && !profileRequest.getDriverLicenseUrl().isEmpty()) {
+                try {
+                    byte[] driverLicenseUrl = Base64.getDecoder().decode(profileRequest.getDriverLicenseUrl());
+                    String driverLicenseUrlName = saveImageToFileSystem(driverLicenseUrl); // Lưu ảnh và lấy đường dẫn
+                    user.setDriverLicenseUrl(driverLicenseUrlName);
+
+                } catch (IllegalArgumentException e)
+                {
+                    user.setDriverLicenseUrl(profileRequest.getDriverLicenseUrl());
+
+                }
+            }
+
+
+            if (profileRequest.getCitizenIdCardUrl() != null && !profileRequest.getCitizenIdCardUrl().isEmpty()) {
+                try {
+                    byte[] citizenIdCardUrl = Base64.getDecoder().decode(profileRequest.getCitizenIdCardUrl());
+                    String citizenIdCardUrlName = saveImageToFileSystem(citizenIdCardUrl); // Lưu ảnh và lấy đường dẫn
+                    user.setCitizenIdCardUrl(citizenIdCardUrlName);
+
+                } catch (IllegalArgumentException e)
+                {
+                    user.setCitizenIdCardUrl(profileRequest.getCitizenIdCardUrl());
+
+                }
+            }
+
+
+
+            return userRepository.save(user);
+        }
+
+        private String saveImageToFileSystem(byte[] imageBytes) throws IOException {
+            if (imageBytes == null || imageBytes.length == 0) {
+                throw new IllegalArgumentException("Dữ liệu ảnh không được để trống");
+            }
+            if (imageBytes.length > 10 * 1024 * 1024) {
+                throw new IllegalArgumentException("Kích thước ảnh vượt quá giới hạn tối đa 10MB.");
+            }
+            String fileName = UUID.randomUUID().toString() + ".png";
+            Path path = Paths.get("/uploads/images/" + fileName);
+            Files.createDirectories(path.getParent());
+            Files.write(path, imageBytes);
+            return fileName;
+        }
+        @Override
+        public void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest) {
+            Token theToken = tokenRepository.findByAccessToken(token)
+                    .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
+            if (theToken != null) {
+                User user = theToken.getUser();
+                user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+                userRepository.save(user);
             }
         }
 
-
-
-        return userRepository.save(user);
-    }
-
-    private String saveImageToFileSystem(byte[] imageBytes) throws IOException {
-        if (imageBytes == null || imageBytes.length == 0) {
-            throw new IllegalArgumentException("Dữ liệu ảnh không được để trống");
-        }
-        if (imageBytes.length > 10 * 1024 * 1024) {
-            throw new IllegalArgumentException("Kích thước ảnh vượt quá giới hạn tối đa 10MB.");
-        }
-        String fileName = UUID.randomUUID().toString() + ".png";
-        Path path = Paths.get("/uploads/images/" + fileName);
-        Files.createDirectories(path.getParent());
-        Files.write(path, imageBytes);
-        return fileName;
-    }
-    @Override
-    public void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest) {
-        Token theToken = tokenRepository.findByAccessToken(token)
-                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
-        if (theToken != null) {
-            User user = theToken.getUser();
-            user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
-            userRepository.save(user);
+        private void revokeAllUserTokens(User user) {
+            var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+            if (validUserTokens.isEmpty())
+                return;
+            validUserTokens.forEach(token -> {
+                token.setExpired(true);
+                token.setRevoked(true);
+            });
+            tokenRepository.saveAll(validUserTokens);
         }
     }
 
-    private void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
-        if (validUserTokens.isEmpty())
-            return;
-        validUserTokens.forEach(token -> {
-            token.setExpired(true);
-            token.setRevoked(true);
-        });
-        tokenRepository.saveAll(validUserTokens);
-    }
-}

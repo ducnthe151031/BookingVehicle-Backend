@@ -1,9 +1,13 @@
 package com.example.bookingvehiclebackend.v1.controller;
 
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
+import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
+import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.BookingVehicleRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.ProfileRequest;
+import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
+import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
 import com.example.bookingvehiclebackend.v1.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,10 +32,13 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 public class UserController {
     private final UserService userService;
     private final AuthenService authenService;
+    private final RentalRequestRepository rentalRequestRepository;
+    private final VehicleRepository vehicleRepository;
 
     @PostMapping("/bookings")
-    public BaseApiResponse<?> bookingVehicle(@RequestBody BookingVehicleRequest request) {
-        return BaseApiResponse.succeed(userService.bookingVehicle(request));
+    public BaseApiResponse<?> bookingVehicle(@RequestBody BookingVehicleRequest request) throws Exception {
+        return BaseApiResponse.succeed(userService.bookingVehicle
+                (request));
     }
     @GetMapping("/profile")
     public BaseApiResponse<?> profile() {
@@ -87,6 +94,23 @@ public class UserController {
     @PutMapping("/profile")
     public BaseApiResponse<?> updateProfile(@RequestBody ProfileRequest profileRequest) throws IOException {
         return BaseApiResponse.succeed(userService.updateProfile(profileRequest));
+    }
+
+
+    @GetMapping("/payment/success")
+    public void handlePaymentSuccess(@RequestParam("orderCode") long orderCode, HttpServletResponse response) throws IOException {
+        // Tìm rental request dựa trên orderCode
+        RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
+                .orElseThrow(() -> new RuntimeException("Rental request not found"));
+        rr.setPaymentStatus(true);
+        // Cập nhật trạng thái xe thành "rented"
+        Vehicle v = vehicleRepository.findById(rr.getVehicleId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        v.setStatus("RENTED");
+        vehicleRepository.save(v);
+
+        // Chuyển hướng về trang home
+        response.sendRedirect("http://localhost:5173/home"); // Thay bằng domain thực tế của frontend
     }
 
 }
