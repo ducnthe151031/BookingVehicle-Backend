@@ -6,11 +6,12 @@ import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AdminService {
-    Object createVehicle(CreateVehicleRequest request);
+    Object createVehicle(CreateVehicleRequest request) throws IOException;
 
     List<Category> categoryList();
     List<Brand> brandList();
@@ -21,7 +22,7 @@ public interface AdminService {
 
     Object viewVehicle(String id);
 
-    Object updateVehicle(CreateVehicleRequest request);
+    Object updateVehicle(CreateVehicleRequest request) throws IOException;
 
     void deleteVehicle(CreateVehicleRequest request);
 
