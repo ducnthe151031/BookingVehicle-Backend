@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "categories", schema = "car_rental_system")
+@Table(name = "categories", schema = "vehicle_rental_system")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -3,33 +3,46 @@ package com.example.bookingvehiclebackend.v1.dto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Entity
 @Getter
 @Setter
-@Entity
-@Table(name = "payments", schema = "car_rental_system")
+@Table(name = "payments", schema = "vehicle_rental_system")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Payment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", length = 100)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "rental_id", length = 100)
-    private String rentalId;
+    @Column(name = "amount", nullable = false)
+    private Integer amount;
 
-    @Column(name = "amount", precision = 10, scale = 2)
-    private BigDecimal amount;
+    @Column(name = "description", nullable = false)
+    private String description;
+    @Column(name = "user_id", nullable = false)
+    private String userId;
 
-    @Column(name = "payment_method", length = 100)
-    private String paymentMethod;
+    @Column(name = "is_payment", nullable = true)
+    private boolean isPayment;
 
-    @Column(name = "status", length = 100)
-    private String status;
+    @Column(name = "url", nullable = false)
+    private String url;
 
-    @Column(name = "payment_date")
-    private Instant paymentDate;
+    @Column(name = "booking_id", nullable = false)
+    private String bookingId;
+
+
+
+
 
 }
+
+
+
+
