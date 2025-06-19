@@ -19,10 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationConfig {
     private final UserRepository userRepository;
 
+
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-
+            //                .orElseThrow(() -> PvrsClientException.ofHandler(PvrsErrorHandler.USERNAME_NOT_FOUND));
             return userRepository.findByUsername(username).orElse(new User());
         };
     }
