@@ -31,4 +31,11 @@ public class CreateVehicleRequest {
     private String description;
     private BigDecimal hourlyPrice;
     private String vehicleTypeId;
+    private String imageUrl;
+    // For the URL of the vehicle registration document image
+    private String registrationDocumentUrl;
+
+    // For the approval status (true/false)
+    private boolean approved;
+
 }

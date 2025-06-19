@@ -13,9 +13,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +37,7 @@ public class AdminServiceImpl implements AdminService {
     private final VehicleTypeRepository vehicleTypeRepository;
 
     @Override
-    public Object createVehicle(CreateVehicleRequest request) {
+    public Object createVehicle(CreateVehicleRequest request) throws IOException {
         if (!SecurityUtils.hasRole(Role.ADMIN, Role.OWNER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_CREATE_VEHICLE);
         }
@@ -59,7 +65,43 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
+        vehicle.setApproved(false);
+
+
+
+        String imageUrlName = null;
+        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+            byte[] imageUrl = Base64.getDecoder().decode(request.getImageUrl());
+            imageUrlName = saveImageToFileSystem(imageUrl); // Lưu ảnh và lấy đường dẫn
+            vehicle.setImageUrl(imageUrlName);
+
+        }
+
+        String registrationDocumentName = null;
+        if (request.getRegistrationDocumentUrl() != null && !request.getRegistrationDocumentUrl().isEmpty()) {
+            byte[] registrationDocument = Base64.getDecoder().decode(request.getRegistrationDocumentUrl());
+            registrationDocumentName = saveImageToFileSystem(registrationDocument); // Lưu ảnh và lấy đường dẫn
+            vehicle.setRegistrationDocumentUrl(registrationDocumentName);
+
+        }
+
+
+
         return vehicleRepository.save(vehicle);
+    }
+
+    private String saveImageToFileSystem(byte[] imageBytes) throws IOException {
+        if (imageBytes == null || imageBytes.length == 0) {
+            throw new IllegalArgumentException("Dữ liệu ảnh không được để trống");
+        }
+        if (imageBytes.length > 10 * 1024 * 1024) {
+            throw new IllegalArgumentException("Kích thước ảnh vượt quá giới hạn tối đa 10MB.");
+        }
+        String fileName = UUID.randomUUID().toString() + ".png";
+        Path path = Paths.get("/uploads/images/" + fileName);
+        Files.createDirectories(path.getParent());
+        Files.write(path, imageBytes);
+        return fileName;
     }
 
     @Override
@@ -80,6 +122,9 @@ public class AdminServiceImpl implements AdminService {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
         }
         booking.setStatus(RentalStatus.APPROVED.name());
+        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+        assert vehicle != null;
+        vehicle.setStatus("RENTED");
         return rentalRequestRepository.save(booking);
     }
 
@@ -110,7 +155,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Object updateVehicle(CreateVehicleRequest request) {
+    public Object updateVehicle(CreateVehicleRequest request) throws IOException {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setVehicleName(request.getName());
         vehicle.setBranchId(request.getBrand());
@@ -128,6 +173,35 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
+
+
+        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+            try {
+                byte[] imageUrl = Base64.getDecoder().decode(request.getImageUrl());
+                String imageUrlName = saveImageToFileSystem(imageUrl); // Lưu ảnh và lấy đường dẫn
+                vehicle.setImageUrl(imageUrlName);
+
+            } catch (IllegalArgumentException e)
+            {
+                vehicle.setImageUrl(request.getImageUrl());
+
+            }
+        }
+
+        if (request.getRegistrationDocumentUrl() != null && !request.getRegistrationDocumentUrl().isEmpty()) {
+            try {
+                byte[] registrationDocument = Base64.getDecoder().decode(request.getRegistrationDocumentUrl());
+                String registrationDocumentName = saveImageToFileSystem(registrationDocument); // Lưu ảnh và lấy đường dẫn
+                vehicle.setRegistrationDocumentUrl(registrationDocumentName);
+
+            } catch (IllegalArgumentException e)
+            {
+                vehicle.setRegistrationDocumentUrl(request.getRegistrationDocumentUrl());
+
+            }
+        }
+
+
         return vehicleRepository.save(vehicle);
     }
 
@@ -180,6 +254,9 @@ public class AdminServiceImpl implements AdminService {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
         }
         booking.setStatus(RentalStatus.REJECTED.name());
+        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+        assert vehicle != null;
+        vehicle.setStatus("AVAILABLE");
         return rentalRequestRepository.save(booking);
     }
 }

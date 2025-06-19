@@ -7,11 +7,20 @@ import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,8 +34,26 @@ public class AdminController {
 
     //test
     @PostMapping("/cars")
-    public BaseApiResponse<?> createVehicle(@RequestBody CreateVehicleRequest request) {
+    public BaseApiResponse<?> createVehicle(@RequestBody CreateVehicleRequest request) throws IOException {
         return BaseApiResponse.succeed(adminService.createVehicle(request));
+    }
+
+    @GetMapping("/images/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) {
+        try {
+            Path path = Paths.get("/uploads/images/" + filename);
+            Resource resource = new UrlResource(path.toUri());
+
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/approve-booking/{id}")
@@ -74,7 +101,7 @@ public class AdminController {
     }
 
     @PutMapping("/cars")
-    public BaseApiResponse<?> updateVehicle(@RequestBody CreateVehicleRequest request) {
+    public BaseApiResponse<?> updateVehicle(@RequestBody CreateVehicleRequest request) throws IOException {
         return BaseApiResponse.succeed(adminService.updateVehicle(request));
     }
     @DeleteMapping("/cars")

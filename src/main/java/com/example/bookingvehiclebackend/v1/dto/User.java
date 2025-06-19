@@ -57,6 +57,12 @@ public class User implements  UserDetails {
     @Column(name = "address", length = 100)
     private String address;
 
+    @Column(name = "citizen_id_card_url", length = 255) // Column for Citizen ID Card image URL
+    private String citizenIdCardUrl;
+
+    @Column(name = "driver_license_url", length = 255) // Column for Driver's License image URL
+    private String driverLicenseUrl;
+
 
 
     @Override

@@ -1,3 +1,6 @@
+contract:
+  images:
+    path: C:/image
 cors:
   allowed-origins: "*"
   allowed-methods: "*"

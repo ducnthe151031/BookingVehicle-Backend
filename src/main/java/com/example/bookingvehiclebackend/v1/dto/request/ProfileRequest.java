@@ -11,9 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProfileRequest {
     private String fullName;
-    private String firstName;
-    private String lastName;
     private String email;
     private String phoneNumber;
     private String address;
+    // --- NEW PROPERTIES FOR IMAGE URLs ---
+    private String citizenIdCardUrl;
+    private String driverLicenseUrl;
 }

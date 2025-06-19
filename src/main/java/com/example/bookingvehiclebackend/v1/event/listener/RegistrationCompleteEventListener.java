@@ -42,7 +42,7 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
 
         String url = event.getApplicationUrl() + "/v1/user/verify-email?token=" + jwtToken; ///v1/path/verify-email
 
-        String url = event.getApplicationUrl() + "/v1/user/verify-email?token=" + jwtToken;
+
 
         try {
             sendVerificationEmail(url);

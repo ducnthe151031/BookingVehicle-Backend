@@ -24,12 +24,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -72,13 +78,8 @@ public class UserServiceImpl implements UserService {
         rr.setBrandId(request.getBrandId());
         rr.setCategoryId(request.getCategoryId());
         rr.setRentType(request.getRentType());
-        // Tính totalPrice = pricePerDay * số ngày (làm ví dụ đơn giản: 1 ngày = 24h)
-        long daysBetween = ChronoUnit.DAYS.between(rr.getStartDate().toLocalDate(), rr.getEndDate().toLocalDate());
-        if (daysBetween <= 0) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.RENTAL_TIME_OVER_0_DAY);
-        }
-        BigDecimal total = v.getPricePerDay().multiply(BigDecimal.valueOf(daysBetween));
-        rr.setTotalPrice(total);
+        rr.setTotalPrice(request.getTotalPrice());
+        v.setStatus("PENDING");
         return rentalRequestRepository.save(rr);
     }
     @Override
@@ -132,17 +133,61 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Object updateProfile(ProfileRequest profileRequest) {
+    public Object updateProfile(ProfileRequest profileRequest) throws IOException {
         User user = SecurityUtils.getCurrentUser()
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         user.setEmail(profileRequest.getEmail());
-        user.setUsername(profileRequest.getFirstName()+ " " + profileRequest.getLastName());
         user.setFullName(profileRequest.getFullName());
         user.setPhoneNumber(profileRequest.getPhoneNumber());
         user.setAddress(profileRequest.getAddress());
+
+
+
+        if (profileRequest.getDriverLicenseUrl() != null && !profileRequest.getDriverLicenseUrl().isEmpty()) {
+            try {
+                byte[] driverLicenseUrl = Base64.getDecoder().decode(profileRequest.getDriverLicenseUrl());
+                String driverLicenseUrlName = saveImageToFileSystem(driverLicenseUrl); // Lưu ảnh và lấy đường dẫn
+                user.setDriverLicenseUrl(driverLicenseUrlName);
+
+            } catch (IllegalArgumentException e)
+            {
+                user.setDriverLicenseUrl(profileRequest.getDriverLicenseUrl());
+
+            }
+        }
+
+
+        if (profileRequest.getCitizenIdCardUrl() != null && !profileRequest.getCitizenIdCardUrl().isEmpty()) {
+            try {
+                byte[] citizenIdCardUrl = Base64.getDecoder().decode(profileRequest.getCitizenIdCardUrl());
+                String citizenIdCardUrlName = saveImageToFileSystem(citizenIdCardUrl); // Lưu ảnh và lấy đường dẫn
+                user.setCitizenIdCardUrl(citizenIdCardUrlName);
+
+            } catch (IllegalArgumentException e)
+            {
+                user.setCitizenIdCardUrl(profileRequest.getCitizenIdCardUrl());
+
+            }
+        }
+
+
+
         return userRepository.save(user);
     }
 
+    private String saveImageToFileSystem(byte[] imageBytes) throws IOException {
+        if (imageBytes == null || imageBytes.length == 0) {
+            throw new IllegalArgumentException("Dữ liệu ảnh không được để trống");
+        }
+        if (imageBytes.length > 10 * 1024 * 1024) {
+            throw new IllegalArgumentException("Kích thước ảnh vượt quá giới hạn tối đa 10MB.");
+        }
+        String fileName = UUID.randomUUID().toString() + ".png";
+        Path path = Paths.get("/uploads/images/" + fileName);
+        Files.createDirectories(path.getParent());
+        Files.write(path, imageBytes);
+        return fileName;
+    }
     @Override
     public void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest) {
         Token theToken = tokenRepository.findByAccessToken(token)
@@ -165,4 +210,3 @@ public class UserServiceImpl implements UserService {
         tokenRepository.saveAll(validUserTokens);
     }
 }
-

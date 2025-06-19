@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -26,4 +27,5 @@ public class BookingVehicleRequest {
     private String brandId;
     private String categoryId;
     private String rentType;
+    private BigDecimal totalPrice;
 }
