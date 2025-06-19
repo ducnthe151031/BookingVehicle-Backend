@@ -46,7 +46,7 @@ public class Vehicle {
     private String description;
 
     @Column(name = "status", length = 100)
-    private String status; // AVAILABLE, RENTED, MAINTENANCE, HIDDEN
+    private String status; // AVAILABLE, PENDING ,RENTED, MAINTENANCE, HIDDEN
 
     @Column(name = "image_url", length = 100)
     private String imageUrl;
@@ -68,6 +68,12 @@ public class Vehicle {
 
     @Column(name = "location", length = 100)
     private String location;
+
+    @Column(name = "registration_document_url", length = 255) // Stores the URL of the registration document image
+    private String registrationDocumentUrl;
+
+    @Column(name = "approved", nullable = false) // Boolean flag for approval status
+    private boolean approved; // Default value (false) will be set by JPA if no other default is specified
 
 
 }
