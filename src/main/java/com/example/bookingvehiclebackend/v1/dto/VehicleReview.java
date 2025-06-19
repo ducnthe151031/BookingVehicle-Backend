@@ -9,7 +9,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "vehicle_reviews", schema = "car_rental_system")
+@Table(name = "vehicle_reviews", schema = "vehicle_rental_system")
 public class VehicleReview {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
