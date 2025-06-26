@@ -13,7 +13,7 @@ import java.util.Collection;
 
 
 @Entity
-@Table(name = "user", schema = "car_rental_system")
+@Table(name = "user", schema = "vehicle_rental_system")
 @Getter
 @Setter
 public class User implements  UserDetails {

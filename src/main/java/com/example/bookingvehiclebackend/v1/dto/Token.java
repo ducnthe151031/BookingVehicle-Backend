@@ -12,7 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @Entity
-@Table(name = "token", schema = "car_rental_system")
+@Table(name = "token", schema = "vehicle_rental_system")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Token {
