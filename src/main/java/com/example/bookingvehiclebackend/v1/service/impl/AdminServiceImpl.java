@@ -7,7 +7,6 @@ import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.*;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -224,7 +223,6 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setPricePerHour(request.getHourlyPrice());
         vehicle.setLiecensePlate(request.getLicensePlate());
         vehicle.setDescription(request.getDescription());
-        vehicle.setStatus(VehicleStatus.AVAILABLE.name());
         vehicle.setLiecensePlate(request.getLicensePlate());
         vehicle.setCreatedAt(LocalDateTime.now());
         vehicle.setDescription(request.getDescription());
@@ -266,6 +264,8 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void deleteVehicle(CreateVehicleRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        List<RentalRequest> rentalRequest = rentalRequestRepository.findByVehicleId(vehicle.getId());
+        rentalRequestRepository.deleteAll(rentalRequest);
         vehicleRepository.delete(vehicle);
     }
 
