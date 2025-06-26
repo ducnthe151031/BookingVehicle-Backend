@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
 public interface RentalRequestRepository extends JpaRepository<RentalRequest, String>, JpaSpecificationExecutor<Vehicle> {
     // Kiểm tra xem xe đã có booking nào chưa vào khoảng thời gian
     @Query("""
@@ -25,5 +26,9 @@ public interface RentalRequestRepository extends JpaRepository<RentalRequest, St
             @Param("vehicleId") String vehicleId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
+
+
     Optional<RentalRequest> findByOrderCode(long orderCode);
+    List<RentalRequest> findByVehicleId(String vehicleId);
+
 }

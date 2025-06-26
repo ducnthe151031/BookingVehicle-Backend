@@ -1,13 +1,14 @@
 package com.example.bookingvehiclebackend.v1.service;
 
-import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
-import com.example.bookingvehiclebackend.v1.dto.request.BookingVehicleRequest;
-import com.example.bookingvehiclebackend.v1.dto.request.ProfileRequest;
+import com.example.bookingvehiclebackend.v1.dto.request.*;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface UserService {
     Object bookingVehicle(BookingVehicleRequest request) throws Exception;
@@ -21,5 +22,16 @@ public interface UserService {
     Object updateProfile(ProfileRequest profileRequest) throws IOException;
 
     void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest);
-}
 
+    Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
+
+    Object getReviewsByVehicleId(String vehicleId, Pageable pageable);
+
+    Object updateReview(String reviewId, UpdateReviewRequest request);
+
+    void deleteReview(String reviewId);
+
+    Object createReview(CreateReviewRequest request);
+
+    Double calculateAverageRating(String vehicleId);
+}
