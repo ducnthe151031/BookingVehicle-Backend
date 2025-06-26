@@ -26,6 +26,12 @@ public enum PvrsErrorHandler implements IPvrsErrorHandler{
     RENTAL_TIME_OVER_0_DAY("MEA000019","common.apiResponse.rentalTimeOver0Day"),
     BOOKING_IS_NOT_PENDING_STATUS("MEA000020", "common.apiResponse.bookingIsNotPendingStatus"),
     VEHICLE_EXISTED("MEA000021","common.apiResponse.vehicleExisted" ),
+    RENTAL_REQUEST_NOT_COMPLETED("MEA000022", "Đơn thuê xe chưa hoàn thành, bạn không thể để lại đánh giá."),
+    RENTAL_REQUEST_NOT_FOUND("MEA000023", "Không tìm thấy đơn thuê xe."),
+    REVIEW_ALREADY_EXISTS("MEA000024", "Bạn đã đánh giá cho đơn thuê xe này rồi."),
+    REVIEW_NOT_FOUND("MEA000025", "Không tìm thấy đánh giá."),
+    NOT_REVIEW_AUTHOR("MEA000026", "Bạn không có quyền thực hiện hành động này với đánh giá của người khác."),
+    INVALID_RATING("MEA000027", "Điểm đánh giá phải từ 1 đến 5.");
     ;
     private final String code;
     private final String message;
