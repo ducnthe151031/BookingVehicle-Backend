@@ -1,34 +1,45 @@
 package com.example.bookingvehiclebackend.demo;
 
+import com.example.bookingvehiclebackend.demo.chatReponseDemo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 
-import java.io.IOException;
+import java.io.InputStream;
+import java.text.Normalizer;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class chatbotServiceDemo {
 
-    private Map<String, String> responseMap;
+    private Map<String, chatReponseDemo> responseMap = new LinkedHashMap<>();
 
-    public void loadResponses() throws IOException {
+
+    public void init() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        responseMap = mapper.readValue(
-                new ClassPathResource("chatbot/responses.json").getInputStream(),
-                new TypeReference<>() {}
-        );
+        InputStream input = new ClassPathResource("chatbot/responses.json").getInputStream();
+        responseMap = mapper.readValue(input, new TypeReference<>() {});
     }
 
-    public String getResponse(String userInput) {
-        String lowerInput = userInput.toLowerCase();
-        for (String keyword : responseMap.keySet()) {
-            if (lowerInput.contains(keyword)) {
-                return responseMap.get(keyword);
+    public chatReponseDemo getResponse(String userInput) {
+        String normalizedInput = removeVietnameseDiacritics(userInput.toLowerCase());
+
+        for (Map.Entry<String, chatReponseDemo> entry : responseMap.entrySet()) {
+            if (normalizedInput.contains(entry.getKey())) {
+                return entry.getValue();
             }
         }
-        return "Xin lỗi, tôi chưa hiểu. Bạn có thể nói rõ hơn không?";
+
+        return new chatReponseDemo("Xin lỗi, tôi chưa hiểu. Bạn có thể nói rõ hơn không?", null);
+    }
+
+    private String removeVietnameseDiacritics(String input) {
+        String temp = Normalizer.normalize(input, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(temp).replaceAll("").replaceAll("đ", "d").replaceAll("Đ", "D");
     }
 }
