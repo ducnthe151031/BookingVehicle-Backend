@@ -1,8 +1,26 @@
 {
-  "xin chào": "Chào bạn! Tôi có thể giúp gì cho bạn trong việc thuê xe?",
-  "đặt xe": "Bạn muốn đặt xe nào? Vui lòng chọn xe và ngày giờ.",
-  "hủy xe": "Vui lòng cung cấp mã booking để tôi giúp bạn hủy xe.",
-  "xem xe": "Bạn có thể xem danh sách xe tại trang chủ.",
-  "đăng nhập": "Vui lòng vào trang đăng nhập để tiếp tục.",
-  "đăng ký": "Bạn có thể tạo tài khoản mới tại trang đăng ký."
+  "xin chao": {
+    "response": "Chào bạn! Tôi có thể giúp gì cho bạn trong việc thuê xe?",
+    "actionType": null
+  },
+  "dat xe": {
+    "response": "Bạn muốn đặt xe nào? Vui lòng chọn xe và ngày giờ.",
+    "actionType": "startBooking"
+  },
+  "huy xe": {
+    "response": "Vui lòng cung cấp mã booking để tôi giúp bạn hủy xe.",
+    "actionType": "cancelBooking"
+  },
+  "xem xe": {
+    "response": "Bạn có thể xem danh sách xe tại trang chủ.",
+    "actionType": "showVehicleList"
+  },
+  "dang nhap": {
+    "response": "Vui lòng vào trang đăng nhập để tiếp tục.",
+    "actionType": "redirectToLogin"
+  },
+  "dang ky": {
+    "response": "Bạn có thể tạo tài khoản mới tại trang đăng ký.",
+    "actionType": "redirectToRegister"
+  }
 }
