@@ -1,21 +1,29 @@
 package com.example.bookingvehiclebackend.demo;
 
 public class chatReponseDemo {
-    private String reply;
+    private String response;
+    private String actionType;
 
-    public chatReponseDemo(String reply) {
-        this.reply = reply;
+    public chatReponseDemo() {}
+
+    public chatReponseDemo(String response, String actionType) {
+        this.response = response;
+        this.actionType = actionType;
     }
 
-    public chatReponseDemo() {
+    public String getResponse() {
+        return response;
     }
 
-    public String getReply() {
-        return reply;
+    public void setResponse(String response) {
+        this.response = response;
     }
 
-    public void setReply(String reply) {
-        this.reply = reply;
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
     }
 }
-
