@@ -1,6 +1,7 @@
 package com.example.bookingvehiclebackend.demo;
 
 import com.example.bookingvehiclebackend.demo.chatRequestDemo;
+import com.example.bookingvehiclebackend.demo.chatReponseDemo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +14,7 @@ public class chatbotControllerDemo {
     private chatbotServiceDemo chatService;
 
     @PostMapping
-    public String chat(@RequestBody chatRequestDemo request) {
+    public chatReponseDemo chat(@RequestBody chatRequestDemo request) {
         return chatService.getResponse(request.getMessage());
     }
 }
