@@ -1,21 +1,19 @@
 package com.example.bookingvehiclebackend.demo;
 
+import com.example.bookingvehiclebackend.demo.chatRequestDemo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/chat")
+@CrossOrigin
 public class chatbotControllerDemo {
 
     @Autowired
-    private chatbotServiceDemo chatbotService;
+    private chatbotServiceDemo chatService;
 
     @PostMapping
-    public chatRequestDemo chat(@RequestBody chatRequestDemo request) {
-        String reply = chatbotService.getReply(request.getMessage());
-        return new chatRequestDemo(reply);
+    public String chat(@RequestBody chatRequestDemo request) {
+        return chatService.getResponse(request.getMessage());
     }
 }
