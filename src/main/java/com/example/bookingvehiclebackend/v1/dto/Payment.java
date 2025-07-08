@@ -10,7 +10,7 @@ import java.time.Instant;
 
 @Entity
 @Getter
-@Setter
+@Setter 
 @Table(name = "payments", schema = "vehicle_rental_system")
 @AllArgsConstructor
 @NoArgsConstructor

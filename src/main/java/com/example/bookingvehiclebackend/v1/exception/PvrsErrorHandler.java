@@ -31,7 +31,9 @@ public enum PvrsErrorHandler implements IPvrsErrorHandler{
     REVIEW_ALREADY_EXISTS("MEA000024", "Bạn đã đánh giá cho đơn thuê xe này rồi."),
     REVIEW_NOT_FOUND("MEA000025", "Không tìm thấy đánh giá."),
     NOT_REVIEW_AUTHOR("MEA000026", "Bạn không có quyền thực hiện hành động này với đánh giá của người khác."),
-    INVALID_RATING("MEA000027", "Điểm đánh giá phải từ 1 đến 5.");
+    INVALID_RATING("MEA000027", "Điểm đánh giá phải từ 1 đến 5."),
+    COUPON_NOT_FOUND("MEA000028", "Coupon không tồn tại"),
+    COUPON_IS_EXISTED("MEA000029", "Mã coupon đã tồn tại");
     ;
     private final String code;
     private final String message;
