@@ -46,6 +46,7 @@ public class Vehicle {
     private String description;
 
     @Column(name = "status", length = 100)
+
     private String status; // AVAILABLE, PENDING ,RENTED, MAINTENANCE, HIDDEN
 
     @Column(name = "image_url", length = 100)
