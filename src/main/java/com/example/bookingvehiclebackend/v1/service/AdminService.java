@@ -31,4 +31,7 @@ public interface AdminService {
     List<VehicleType> vehicleTypeList();
 
     Object rejectBooking(String id);
+    void approveVehicle(CreateVehicleRequest request);
+
+    Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
 }

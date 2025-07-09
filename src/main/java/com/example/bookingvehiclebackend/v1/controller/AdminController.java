@@ -90,6 +90,20 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 
+    @GetMapping("/list/approved")
+    public BaseApiResponse<?> getVehicleListIsApproved(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) List<String> brands,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) String vehicleName,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) String status
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return BaseApiResponse.succeed(adminService.searchVehiclesIsApproved(brands, categories, vehicleName, startDate, endDate, pageable, status));
+    }
     @GetMapping("/brand-list")
     public BaseApiResponse<List<Brand>> getBrandList() {
         return BaseApiResponse.succeed(adminService.brandList());
@@ -107,6 +121,12 @@ public class AdminController {
     @DeleteMapping("/cars")
     public BaseApiResponse<Void> deleteVehicle(@RequestBody CreateVehicleRequest request) {
         adminService.deleteVehicle(request);
+        return BaseApiResponse.succeed();
+    }
+
+    @DeleteMapping("/approve-vehicle")
+    public BaseApiResponse<Void> approveVehicle(@RequestBody CreateVehicleRequest request) {
+        adminService.approveVehicle(request);
         return BaseApiResponse.succeed();
     }
     @GetMapping("/rental-list")
