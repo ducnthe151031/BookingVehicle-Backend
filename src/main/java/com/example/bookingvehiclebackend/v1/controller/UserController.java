@@ -110,10 +110,28 @@ public class UserController {
         RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
                 .orElseThrow(() -> new RuntimeException("Rental request not found"));
         rr.setPaymentStatus(true);
+        rr.setStatus("PENDING");
         // Cập nhật trạng thái xe thành "rented"
         Vehicle v = vehicleRepository.findById(rr.getVehicleId())
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         v.setStatus("RENTED");
+        v.setStatus("PENDING");
+        vehicleRepository.save(v);
+
+        // Chuyển hướng về trang home
+        response.sendRedirect("http://localhost:5173/home"); // Thay bằng domain thực tế của frontend
+    }
+
+    @GetMapping("/payment/failed")
+    public void handlePaymentFailed(@RequestParam("orderCode") long orderCode, HttpServletResponse response) throws IOException {
+        // Tìm rental request dựa trên orderCode
+        RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
+                .orElseThrow(() -> new RuntimeException("Rental request not found"));
+        rr.setPaymentStatus(false);
+        // Cập nhật trạng thái xe thành "AVAILABLE"
+        Vehicle v = vehicleRepository.findById(rr.getVehicleId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        v.setStatus("AVAILABLE");
         vehicleRepository.save(v);
 
         // Chuyển hướng về trang home

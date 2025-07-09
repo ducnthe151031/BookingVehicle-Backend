@@ -73,6 +73,7 @@ public class UserServiceImpl implements UserService {
         rr.setStartDate(request.getStartDate());
         rr.setEndDate(request.getEndDate());
         rr.setStatus(RentalStatus.PENDING.name());
+        rr.setStatus(RentalStatus.AVAILABLE.name());
         rr.setDepositPaid(request.isDepositPaid());
         rr.setCreatedAt(LocalDateTime.now());
         rr.setCreatedBy(user.getUsername());
@@ -91,6 +92,7 @@ public class UserServiceImpl implements UserService {
                 .description("Đơn thuê xe của " + user.getUsername())
                 .returnUrl("http://localhost:8080/v1/user/payment/success?orderCode=" + orderCode) // Nếu thanh toán thành công
                 .cancelUrl("http://localhost:5173/home") // Nếu hủy không thanh toán
+                .cancelUrl("http://localhost:8080/v1/user/payment/failed?orderCode=" + orderCode) // Nếu hủy không thanh toán
                 .build();
         rr.setUrl(payOS.createPaymentLink(paymentData).getCheckoutUrl());
         v.setStatus("PENDING");
@@ -228,6 +230,8 @@ public class UserServiceImpl implements UserService {
         return rentalRequestRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+
+            predicates.add(cb.equal(root.get("paymentStatus"), true));
 
             if (user.getId() != null) {
                 predicates.add(cb.equal(root.get("customerId"), user.getId()));
@@ -387,3 +391,4 @@ public class UserServiceImpl implements UserService {
         tokenRepository.saveAll(validUserTokens);
     }
 }
+
