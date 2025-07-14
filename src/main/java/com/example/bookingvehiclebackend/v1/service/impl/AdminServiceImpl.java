@@ -301,11 +301,13 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    //list vehicle type
     public List<VehicleType> vehicleTypeList() {
         return vehicleTypeRepository.findAll();
     }
 
     @Override
+    //reject booking
     public Object rejectBooking(String id) {
         RentalRequest booking = rentalRequestRepository.findById(id)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
@@ -319,6 +321,7 @@ public class AdminServiceImpl implements AdminService {
         return rentalRequestRepository.save(booking);
     }
     @Override
+    //approve Vehicle
     public void approveVehicle(CreateVehicleRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setApproved(true);
@@ -326,6 +329,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    //Search Vehicle is approved
     public Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
         Specification<Vehicle> spec = new Specification<Vehicle>() {
             @Override
