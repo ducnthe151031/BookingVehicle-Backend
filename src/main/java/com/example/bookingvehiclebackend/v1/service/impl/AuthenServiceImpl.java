@@ -84,7 +84,7 @@ public class AuthenServiceImpl implements AuthenService {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_IS_EXISTED);
         }
         if (ObjectUtils.isEmpty(request.getEmail())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);

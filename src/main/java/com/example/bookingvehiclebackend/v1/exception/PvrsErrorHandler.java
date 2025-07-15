@@ -34,7 +34,8 @@ public enum PvrsErrorHandler implements IPvrsErrorHandler{
     INVALID_RATING("MEA000027", "Điểm đánh giá phải từ 1 đến 5."),
     COUPON_NOT_FOUND("MEA000028", "Coupon không tồn tại"),
     COUPON_IS_EXISTED("MEA000029", "Mã coupon đã tồn tại"),
-    INVALID_PASSWORD_FORMAT("MEA000030", "Password must contain at least one uppercase letter, one digit, and one special character.");
+    INVALID_PASSWORD_FORMAT("MEA000030", "Password must contain at least one uppercase letter, one digit, and one special character."),
+    EMAIL_IS_EXISTED("MEA0000031", "Email đã tồn tại")
 
 
     ;
