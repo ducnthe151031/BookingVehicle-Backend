@@ -231,6 +231,7 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
         vehicle.setApproved(false);
 
+
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
             try {
                 byte[] imageUrl = Base64.getDecoder().decode(request.getImageUrl());
@@ -301,13 +302,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    //list vehicle type
     public List<VehicleType> vehicleTypeList() {
         return vehicleTypeRepository.findAll();
     }
 
     @Override
-    //reject booking
     public Object rejectBooking(String id) {
         RentalRequest booking = rentalRequestRepository.findById(id)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
@@ -320,8 +319,8 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setStatus("AVAILABLE");
         return rentalRequestRepository.save(booking);
     }
+
     @Override
-    //approve Vehicle
     public void approveVehicle(CreateVehicleRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setApproved(true);
@@ -329,7 +328,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    //Search Vehicle is approved
     public Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
         Specification<Vehicle> spec = new Specification<Vehicle>() {
             @Override
@@ -399,5 +397,42 @@ public class AdminServiceImpl implements AdminService {
 
         Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
         return page;
+    }
+
+    @Override
+    public Object createBrand(Brand brand) {
+        return brandRepository.save(brand);
+    }
+
+    @Override
+    public Object updateBrand(String id, Brand brand) {
+        Brand brand1 = brandRepository.findById(id).orElse(null);
+
+        assert brand1 != null;
+        brand.setName(brand1.getName());
+        return brandRepository.save(brand1);
+    }
+
+    @Override
+    public void deleteBrand(String id) {
+        brandRepository.deleteById(id);
+    }
+
+    @Override
+    public Object createCategory(Category category) {
+        return categoryRepository.save(category);
+    }
+
+    @Override
+    public Object updateCategory(String id, Category category) {
+        Category category1 = categoryRepository.findById(id).orElse(null);
+
+        assert category1 != null;
+        category.setName(category1.getName());
+        return categoryRepository.save(category1);    }
+
+    @Override
+    public void deleteCategory(String id) {
+        brandRepository.deleteById(id);
     }
 }

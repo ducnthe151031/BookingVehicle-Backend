@@ -75,7 +75,15 @@ public class AuthenServiceImpl implements AuthenService {
 
     @Override
     public LoginResponse register(AuthenRequest request, HttpServletRequest httpServletRequest) {
+        // Validate password format
+        String password = request.getPassword();
+        if (!isValidPassword(password)) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.INVALID_PASSWORD_FORMAT);
+        }
         if (userRepository.existsByUsername(request.getUsername())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
         }
         if (ObjectUtils.isEmpty(request.getEmail())) {
@@ -100,6 +108,11 @@ public class AuthenServiceImpl implements AuthenService {
         loginResponse.setToken(jwtToken);
         loginResponse.setRefreshToken(refreshToken);
         return loginResponse;
+    }
+    private boolean isValidPassword(String password) {
+        // Ít nhất 1 chữ hoa, 1 chữ số và 1 ký tự đặc biệt
+        String regex = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&^#()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/~`]).{8,}$";
+        return password != null && password.matches(regex);
     }
     public String applicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
