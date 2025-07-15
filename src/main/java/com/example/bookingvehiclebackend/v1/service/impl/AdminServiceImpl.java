@@ -40,6 +40,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final RentalRequestRepository rentalRequestRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
+    private final UserRepository userRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -434,5 +435,25 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void deleteCategory(String id) {
         brandRepository.deleteById(id);
+    }
+
+    @Override
+    public List<User> getUserList() {
+        return userRepository.findAll() ;
+    }
+
+
+
+    @Override
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public Object updateUserRole(String id, User user) {
+        User  user1 = userRepository.findById(id).orElse(null);
+        assert user1 != null;
+        user.setRole(user1.getRole());
+        return userRepository.save(user);
     }
 }
