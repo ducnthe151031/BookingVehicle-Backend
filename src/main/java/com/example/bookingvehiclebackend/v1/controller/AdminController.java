@@ -4,6 +4,7 @@ import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.Brand;
 import com.example.bookingvehiclebackend.v1.dto.Category;
 import com.example.bookingvehiclebackend.v1.dto.VehicleType;
+import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.request.CouponRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
@@ -64,6 +65,22 @@ public class AdminController {
     @PutMapping("/reject-booking/{id}")
     public BaseApiResponse<?> rejectBooking(@PathVariable String id) {
         return BaseApiResponse.succeed(adminService.rejectBooking(id));
+    }
+
+    @GetMapping("/user-list")
+    public BaseApiResponse<List<User>> getUserList() {
+        return BaseApiResponse.succeed(adminService.getUserList());
+    }
+
+    @PutMapping("/user-list/{id}")
+    public BaseApiResponse<?> updateUserRole(@PathVariable String id, @RequestBody User user) {
+        return BaseApiResponse.succeed(adminService.updateUserRole(id,user));
+    }
+
+    @DeleteMapping("/user-list/{id}")
+    public BaseApiResponse<?> deleteUser(@PathVariable String id) {
+        adminService.deleteUser(id);
+        return BaseApiResponse.succeed();
     }
 
     @GetMapping("/category-list")
