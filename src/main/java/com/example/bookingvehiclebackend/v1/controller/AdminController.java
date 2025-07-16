@@ -181,6 +181,12 @@ public class AdminController {
         adminService.approveVehicle(request);
         return BaseApiResponse.succeed();
     }
+
+    @DeleteMapping("/reject-vehicle")
+    public BaseApiResponse<Void> rejectVehicle(@RequestBody CreateVehicleRequest request) {
+        adminService.rejectVehicle(request);
+        return BaseApiResponse.succeed();
+    }
     @GetMapping("/rental-list")
     public BaseApiResponse<?> getRentalList(
             @RequestParam(defaultValue = "0") int page,
