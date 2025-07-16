@@ -74,7 +74,7 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
-        vehicle.setApproved(false);
+        vehicle.setApproved(null);
 
 
 
@@ -230,7 +230,7 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
-        vehicle.setApproved(false);
+        vehicle.setApproved(null);
 
 
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
@@ -325,6 +325,7 @@ public class AdminServiceImpl implements AdminService {
     public void approveVehicle(CreateVehicleRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setApproved(true);
+        vehicle.setReason("");
         vehicleRepository.save(vehicle);
     }
 
@@ -410,7 +411,7 @@ public class AdminServiceImpl implements AdminService {
         Brand brand1 = brandRepository.findById(id).orElse(null);
 
         assert brand1 != null;
-        brand.setName(brand1.getName());
+        brand1.setName(brand.getName());
         return brandRepository.save(brand1);
     }
 
@@ -429,12 +430,13 @@ public class AdminServiceImpl implements AdminService {
         Category category1 = categoryRepository.findById(id).orElse(null);
 
         assert category1 != null;
-        category.setName(category1.getName());
-        return categoryRepository.save(category1);    }
+        category1.setName(category.getName());
+        return categoryRepository.save(category1);
+    }
 
     @Override
     public void deleteCategory(String id) {
-        brandRepository.deleteById(id);
+        categoryRepository.deleteById(id);
     }
 
     @Override
@@ -455,5 +457,13 @@ public class AdminServiceImpl implements AdminService {
         assert user1 != null;
         user.setRole(user1.getRole());
         return userRepository.save(user);
+    }
+
+    @Override
+    public void rejectVehicle(CreateVehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        vehicle.setApproved(false);
+        vehicle.setReason(request.getReason());
+        vehicleRepository.save(vehicle);
     }
 }

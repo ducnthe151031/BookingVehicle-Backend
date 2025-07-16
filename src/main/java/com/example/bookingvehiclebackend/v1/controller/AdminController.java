@@ -3,8 +3,8 @@ package com.example.bookingvehiclebackend.v1.controller;
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.Brand;
 import com.example.bookingvehiclebackend.v1.dto.Category;
-import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.User;
+import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.request.CouponRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
@@ -82,7 +82,6 @@ public class AdminController {
         adminService.deleteUser(id);
         return BaseApiResponse.succeed();
     }
-
     @GetMapping("/category-list")
     public BaseApiResponse<List<Category>> getCategoryList() {
         return BaseApiResponse.succeed(adminService.categoryList());
@@ -179,6 +178,12 @@ public class AdminController {
     @DeleteMapping("/approve-vehicle")
     public BaseApiResponse<Void> approveVehicle(@RequestBody CreateVehicleRequest request) {
         adminService.approveVehicle(request);
+        return BaseApiResponse.succeed();
+    }
+
+    @DeleteMapping("/reject-vehicle")
+    public BaseApiResponse<Void> rejectVehicle(@RequestBody CreateVehicleRequest request) {
+        adminService.rejectVehicle(request);
         return BaseApiResponse.succeed();
     }
     @GetMapping("/rental-list")

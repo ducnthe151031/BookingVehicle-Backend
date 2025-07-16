@@ -2,8 +2,8 @@ package com.example.bookingvehiclebackend.v1.service;
 
 import com.example.bookingvehiclebackend.v1.dto.Brand;
 import com.example.bookingvehiclebackend.v1.dto.Category;
-import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.User;
+import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -51,7 +51,10 @@ public interface AdminService {
 
     List<User> getUserList();
 
+
     void deleteUser(String id);
 
     Object updateUserRole(String id, User user);
+
+    void rejectVehicle(CreateVehicleRequest request);
 }
