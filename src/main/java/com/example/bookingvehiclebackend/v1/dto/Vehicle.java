@@ -76,5 +76,9 @@ public class Vehicle {
     @Column(name = "approved", nullable = false) // Boolean flag for approval status
     private boolean approved; // Default value (false) will be set by JPA if no other default is specified
 
+    @Column(name = "user_id", length = 100)
+    private String userId;
 
+    @Column(name = "reason", length = 100)
+    private String reason;
 }
