@@ -54,4 +54,6 @@ public interface AdminService {
     void deleteUser(String id);
 
     Object updateUserRole(String id, User user);
+
+    void rejectVehicle(CreateVehicleRequest request);
 }
