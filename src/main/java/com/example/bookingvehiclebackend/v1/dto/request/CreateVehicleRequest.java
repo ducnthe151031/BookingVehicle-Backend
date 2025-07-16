@@ -32,10 +32,11 @@ public class CreateVehicleRequest {
     private BigDecimal hourlyPrice;
     private String vehicleTypeId;
     private String imageUrl;
+    private String reason;
     // For the URL of the vehicle registration document image
     private String registrationDocumentUrl;
 
     // For the approval status (true/false)
-    private boolean approved;
+    private Boolean approved;
 
 }
