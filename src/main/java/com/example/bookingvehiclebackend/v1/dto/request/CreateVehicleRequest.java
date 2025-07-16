@@ -32,6 +32,7 @@ public class CreateVehicleRequest {
     private BigDecimal hourlyPrice;
     private String vehicleTypeId;
     private String imageUrl;
+    private String reason;
     // For the URL of the vehicle registration document image
     private String registrationDocumentUrl;
 
