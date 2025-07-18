@@ -30,7 +30,11 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
     private static final String[] WHITE_LIST_URL = {
             "v1/auth/**",
-            "v1/user/**"
+            "v1/user/**",
+            "/verification-success.html",
+            "/verification-failed.html",
+            "/user-has-been-verified.html",
+
     };
 
     @Bean
@@ -40,7 +44,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(WHITE_LIST_URL).permitAll();
-                    // Cho phép cả OWNER, USER và ADMIN truy cập POST /v1/admin/cars
+                    // Cho phép cả OWNER và ADMIN truy cập POST /v1/admin/cars
                     auth.requestMatchers(HttpMethod.GET, "/v1/user/profile").hasAnyRole("OWNER", "ADMIN", "USER");
                     auth.requestMatchers(HttpMethod.PUT, "/v1/user/profile").hasAnyRole("OWNER", "ADMIN", "USER");
                     auth.requestMatchers(HttpMethod.POST, "/v1/user/change-password").hasAnyRole("OWNER", "ADMIN", "USER");

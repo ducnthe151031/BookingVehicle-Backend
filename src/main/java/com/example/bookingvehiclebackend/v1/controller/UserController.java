@@ -3,9 +3,6 @@ package com.example.bookingvehiclebackend.v1.controller;
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
 import com.example.bookingvehiclebackend.v1.dto.Vehicle;
-import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
-import com.example.bookingvehiclebackend.v1.dto.request.BookingVehicleRequest;
-import com.example.bookingvehiclebackend.v1.dto.request.ProfileRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
 import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
 import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
@@ -47,6 +44,7 @@ public class UserController {
         return BaseApiResponse.succeed(userService.bookingVehicle
                 (request));
     }
+
     @GetMapping("/profile")
     public BaseApiResponse<?> profile() {
         return BaseApiResponse.succeed(userService.profile());
@@ -69,6 +67,7 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
+
     @PostMapping("/change-password")
     public BaseApiResponse<Void> changePassword(@RequestBody AuthenRequest request) {
         userService.changePassword(request);
@@ -84,18 +83,19 @@ public class UserController {
     }
 
     @GetMapping("/verify-email")
-    public BaseApiResponse<Void> verifyEmail(@RequestParam String token,
+    public BaseApiResponse<Void> verifyEmail(@RequestParam("token") String token,
                                              HttpServletResponse response) throws IOException {
         String successful = userService.verifyEmail(token);
         if ("Successful".equals(successful)) {
             response.sendRedirect("/verification-success.html");
+        } else if ("User has been verified".equals(successful)) {
+            response.sendRedirect("/user-has-been-verified.html");
         } else {
             response.sendRedirect("/verification-failed.html");
         }
 
         return BaseApiResponse.succeed();
     }
-
 
 
     @PutMapping("/profile")
@@ -114,7 +114,6 @@ public class UserController {
         // Cập nhật trạng thái xe thành "rented"
         Vehicle v = vehicleRepository.findById(rr.getVehicleId())
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
-        v.setStatus("RENTED");
         v.setStatus("PENDING");
         vehicleRepository.save(v);
 
@@ -203,6 +202,7 @@ public class UserController {
         userService.deleteReview(reviewId);
         return BaseApiResponse.succeed();
     }
+
     @GetMapping("/average-rating/{vehicleId}")
     public BaseApiResponse<Double> getAverageRatingForVehicle(@PathVariable String vehicleId) {
         // Giả sử logic đã được chuyển qua ReviewService
@@ -210,4 +210,3 @@ public class UserController {
         return BaseApiResponse.succeed(averageRating);
     }
 }
-
