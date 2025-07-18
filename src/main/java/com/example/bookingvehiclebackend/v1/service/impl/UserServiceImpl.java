@@ -132,42 +132,14 @@ public class UserServiceImpl implements UserService {
         revokeAllUserTokens(user);
         String newToken = jwtService.generateToken(user);
         // Tự động lấy port từ request header
-        String frontendUrl = extractFrontendUrl(httpServletRequest);
+        String frontendUrl = SecurityUtils.extractFrontendUrl(httpServletRequest);
         String resetUrl = frontendUrl + "/forgotPassword?token=";
         publisher.publishEvent(new PasswordResetEvent(user, resetUrl, newToken));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(newToken);
         return loginResponse;
     }
-    private String extractFrontendUrl(HttpServletRequest request) {
-        // Thử lấy từ Origin header trước
-        String origin = request.getHeader("Origin");
-        if (origin != null && !origin.isEmpty()) {
-            return origin;
-        }
 
-        // Nếu không có Origin, lấy từ Referer
-        String referer = request.getHeader("Referer");
-        if (referer != null && !referer.isEmpty()) {
-            try {
-                URL url = new URL(referer);
-                StringBuilder baseUrl = new StringBuilder();
-                baseUrl.append(url.getProtocol()).append("://").append(url.getHost());
-
-                if (url.getPort() != -1) {
-                    baseUrl.append(":").append(url.getPort());
-                }
-
-                return baseUrl.toString();
-            } catch (Exception e) {
-                // Log error và fallback
-                log.warn("Cannot parse referer URL: {}", referer, e);
-            }
-        }
-
-        // Fallback mặc định
-        return "http://localhost:5173";
-    }
     @Override
     public String verifyEmail(String token) {
         Token theToken = tokenRepository.findByAccessToken(token)
