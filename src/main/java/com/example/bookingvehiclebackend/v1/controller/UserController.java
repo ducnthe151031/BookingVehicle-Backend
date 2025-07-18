@@ -8,6 +8,8 @@ import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
 import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
 import com.example.bookingvehiclebackend.v1.service.UserService;
+import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -105,7 +107,7 @@ public class UserController {
 
 
     @GetMapping("/payment/success")
-    public void handlePaymentSuccess(@RequestParam("orderCode") long orderCode, HttpServletResponse response) throws IOException {
+    public void handlePaymentSuccess(@RequestParam("orderCode") long orderCode, HttpServletResponse response, HttpServletRequest request) throws IOException {
         // Tìm rental request dựa trên orderCode
         RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
                 .orElseThrow(() -> new RuntimeException("Rental request not found"));
@@ -116,13 +118,13 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         v.setStatus("PENDING");
         vehicleRepository.save(v);
-
+        String frontendUrl = SecurityUtils.extractFrontendUrl(request);
         // Chuyển hướng về trang home
-        response.sendRedirect("http://localhost:5173/home"); // Thay bằng domain thực tế của frontend
+        response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
     }
 
     @GetMapping("/payment/failed")
-    public void handlePaymentFailed(@RequestParam("orderCode") long orderCode, HttpServletResponse response) throws IOException {
+    public void handlePaymentFailed(@RequestParam("orderCode") long orderCode, HttpServletResponse response,HttpServletRequest request) throws IOException {
         // Tìm rental request dựa trên orderCode
         RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
                 .orElseThrow(() -> new RuntimeException("Rental request not found"));
@@ -132,9 +134,9 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         v.setStatus("AVAILABLE");
         vehicleRepository.save(v);
-
+        String frontendUrl = SecurityUtils.extractFrontendUrl(request);
         // Chuyển hướng về trang home
-        response.sendRedirect("http://localhost:5173/home"); // Thay bằng domain thực tế của frontend
+        response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
     }
 
 
