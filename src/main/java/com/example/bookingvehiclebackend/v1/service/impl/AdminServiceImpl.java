@@ -57,7 +57,7 @@ public class AdminServiceImpl implements AdminService {
         }
         Vehicle vehicle = new Vehicle();
         vehicle.setVehicleName(request.getName());
-        vehicle.setBranchId(request.getBrand());
+        vehicle.setBrandId(request.getBrand());
         vehicle.setCategoryId(request.getCategory());
         vehicle.setFuelType(request.getType());
         vehicle.setSeatCount(request.getSeats());
@@ -182,7 +182,7 @@ public class AdminServiceImpl implements AdminService {
 
                 // Điều kiện cơ bản
                 if (brands != null && !brands.isEmpty()) {
-                    predicates.add(root.get("branchId").in(brands));
+                    predicates.add(root.get("brandId").in(brands));
                 }
                 if (categories != null && !categories.isEmpty()) {
                     predicates.add(root.get("categoryId").in(categories));
@@ -216,7 +216,7 @@ public class AdminServiceImpl implements AdminService {
     public Object updateVehicle(CreateVehicleRequest request) throws IOException {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setVehicleName(request.getName());
-        vehicle.setBranchId(request.getBrand());
+        vehicle.setBrandId(request.getBrand());
         vehicle.setCategoryId(request.getCategory());
         vehicle.setFuelType(request.getType());
         vehicle.setSeatCount(request.getSeats());
@@ -376,7 +376,7 @@ public class AdminServiceImpl implements AdminService {
                 predicates.add(root.get("approved").in(true));
 
                 if (brands != null && !brands.isEmpty()) {
-                    predicates.add(root.get("branchId").in(brands));
+                    predicates.add(root.get("brandId").in(brands));
                 }
                 if (categories != null && !categories.isEmpty()) {
                     predicates.add(root.get("categoryId").in(categories));
