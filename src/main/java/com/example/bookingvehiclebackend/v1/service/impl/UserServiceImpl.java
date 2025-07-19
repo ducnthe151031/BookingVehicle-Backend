@@ -5,7 +5,6 @@ import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
-import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.*;
@@ -15,6 +14,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,17 +27,16 @@ import vn.payos.PayOS;
 import vn.payos.type.PaymentData;
 
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final VehicleRepository vehicleRepository;
@@ -54,15 +53,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Object bookingVehicle(BookingVehicleRequest request) throws Exception {
+        log.info("bookingVehicle request={}", request);
         if (!SecurityUtils.hasRole(Role.USER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
         }
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         Vehicle v = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-//        if (!Objects.equals(v.getStatus(), VehicleStatus.AVAILABLE.name())) {
-//            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_UNAVAILABLE);
-//        }
+        if(ObjectUtils.isEmpty(request.getCccdFileName()) || ObjectUtils.isEmpty(request.getLicenseFileName())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_EMPTY_CCCD_AND_LICENSE);
+        }
         List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(request.getVehicleId(), request.getStartDate(), request.getEndDate());
         if (!overlaps.isEmpty()) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);
@@ -72,7 +72,6 @@ public class UserServiceImpl implements UserService {
         rr.setCustomerId(user.getId());
         rr.setStartDate(request.getStartDate());
         rr.setEndDate(request.getEndDate());
-        rr.setStatus(RentalStatus.PENDING.name());
         rr.setStatus(RentalStatus.AVAILABLE.name());
         rr.setDepositPaid(request.isDepositPaid());
         rr.setCreatedAt(LocalDateTime.now());
@@ -91,11 +90,9 @@ public class UserServiceImpl implements UserService {
                 .amount(totalPrice)
                 .description("Đơn thuê xe của " + user.getUsername())
                 .returnUrl("http://localhost:8080/v1/user/payment/success?orderCode=" + orderCode) // Nếu thanh toán thành công
-                .cancelUrl("http://localhost:5173/home") // Nếu hủy không thanh toán
                 .cancelUrl("http://localhost:8080/v1/user/payment/failed?orderCode=" + orderCode) // Nếu hủy không thanh toán
                 .build();
         rr.setUrl(payOS.createPaymentLink(paymentData).getCheckoutUrl());
-        v.setStatus("PENDING");
         vehicleRepository.save(v);
         RentalRequest savedRentalRequest = rentalRequestRepository.save(rr);
 
@@ -136,7 +133,9 @@ public class UserServiceImpl implements UserService {
         //Neu nhu dung email roi -> thu hoi token cua email hien tai
         revokeAllUserTokens(user);
         String newToken = jwtService.generateToken(user);
-        String resetUrl = "http://localhost:5173/forgotPassword?token=";
+        // Tự động lấy port từ request header
+        String frontendUrl = SecurityUtils.extractFrontendUrl(httpServletRequest);
+        String resetUrl = frontendUrl + "/forgotPassword?token=";
         publisher.publishEvent(new PasswordResetEvent(user, resetUrl, newToken));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(newToken);
@@ -148,7 +147,7 @@ public class UserServiceImpl implements UserService {
         Token theToken = tokenRepository.findByAccessToken(token)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
         if ("ACTIVE".equals(theToken.getUser().getFlagActive())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_VERIFIED);
+            return "User has been verified";
         }
         if (jwtService.isTokenValid(theToken.getAccessToken(), theToken.getUser())
                 && "INACTIVE".equals(theToken.getUser().getFlagActive())) {
@@ -391,4 +390,3 @@ public class UserServiceImpl implements UserService {
         tokenRepository.saveAll(validUserTokens);
     }
 }
-
