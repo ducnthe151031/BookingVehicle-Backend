@@ -23,8 +23,8 @@ public class Vehicle {
     @Column(name = "vehicle_name", length = 100)
     private String vehicleName;
 
-    @Column(name = "branch_id", length = 100)
-    private String branchId;
+    @Column(name = "brand_id", length = 100)
+    private String brandId;
 
     @Column(name = "category_id", length = 100)
     private String categoryId; // Ví dụ: "SUV", "Sedan", "7 chỗ", ...
