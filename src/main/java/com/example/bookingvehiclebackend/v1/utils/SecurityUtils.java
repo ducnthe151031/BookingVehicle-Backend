@@ -33,6 +33,9 @@ public class SecurityUtils {
                 .map(user -> new HashSet<>(Arrays.asList(roles)).contains(user.getRole()))
                 .orElse(false);
     }
+
+
+
     public static String extractFrontendUrl(HttpServletRequest request) {
         // Thử lấy từ Origin header trước
         String origin = request.getHeader("Origin");

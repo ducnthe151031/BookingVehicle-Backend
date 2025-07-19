@@ -4,6 +4,8 @@ import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
 import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
+import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
+import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
 import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
@@ -43,8 +45,7 @@ public class UserController {
 
     @PostMapping("/bookings")
     public BaseApiResponse<?> bookingVehicle(@RequestBody BookingVehicleRequest request) throws Exception {
-        return BaseApiResponse.succeed(userService.bookingVehicle
-                (request));
+        return BaseApiResponse.succeed(userService.bookingVehicle(request));
     }
 
     @GetMapping("/profile")
@@ -110,15 +111,22 @@ public class UserController {
     public void handlePaymentSuccess(@RequestParam("orderCode") long orderCode, HttpServletResponse response, HttpServletRequest request) throws IOException {
         // Tìm rental request dựa trên orderCode
         RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Rental request not found"));
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.RENTAL_REQUEST_NOT_FOUND));
         rr.setPaymentStatus(true);
         rr.setStatus("PENDING");
         // Cập nhật trạng thái xe thành "rented"
         Vehicle v = vehicleRepository.findById(rr.getVehicleId())
+
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        v.setStatus("PENDING");
+        vehicleRepository.save(v);
+        String frontendUrl = "http://localhost:5173";
+
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         v.setStatus("PENDING");
         vehicleRepository.save(v);
         String frontendUrl = SecurityUtils.extractFrontendUrl(request);
+
         // Chuyển hướng về trang home
         response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
     }
@@ -127,14 +135,18 @@ public class UserController {
     public void handlePaymentFailed(@RequestParam("orderCode") long orderCode, HttpServletResponse response,HttpServletRequest request) throws IOException {
         // Tìm rental request dựa trên orderCode
         RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Rental request not found"));
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.RENTAL_REQUEST_NOT_FOUND));
         rr.setPaymentStatus(false);
         // Cập nhật trạng thái xe thành "AVAILABLE"
         Vehicle v = vehicleRepository.findById(rr.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         v.setStatus("AVAILABLE");
         vehicleRepository.save(v);
+
+        String frontendUrl = "http://localhost:5173";
+
         String frontendUrl = SecurityUtils.extractFrontendUrl(request);
+
         // Chuyển hướng về trang home
         response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
     }

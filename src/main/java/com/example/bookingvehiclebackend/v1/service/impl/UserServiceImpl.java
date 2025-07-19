@@ -52,15 +52,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Object bookingVehicle(BookingVehicleRequest request) throws Exception {
+        log.info("bookingVehicle request={}", request);
         if (!SecurityUtils.hasRole(Role.USER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
         }
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         Vehicle v = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-//        if (!Objects.equals(v.getStatus(), VehicleStatus.AVAILABLE.name())) {
-//            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_UNAVAILABLE);
-//        }
+        if(ObjectUtils.isEmpty(request.getCccdFileName()) || ObjectUtils.isEmpty(request.getLicenseFileName())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_EMPTY_CCCD_AND_LICENSE);
+        }
         List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(request.getVehicleId(), request.getStartDate(), request.getEndDate());
         if (!overlaps.isEmpty()) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);

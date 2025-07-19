@@ -29,4 +29,6 @@ public class BookingVehicleRequest {
     private String rentType;
     private BigDecimal totalPrice;
     private String url ;
+    private String cccdFileName;
+    private String licenseFileName;
 }
