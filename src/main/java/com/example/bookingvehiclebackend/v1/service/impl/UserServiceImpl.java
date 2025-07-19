@@ -14,7 +14,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +25,6 @@ import vn.payos.PayOS;
 import vn.payos.type.PaymentData;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +33,6 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final VehicleRepository vehicleRepository;
@@ -52,16 +49,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Object bookingVehicle(BookingVehicleRequest request) throws Exception {
-        log.info("bookingVehicle request={}", request);
         if (!SecurityUtils.hasRole(Role.USER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
         }
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         Vehicle v = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-        if(ObjectUtils.isEmpty(request.getCccdFileName()) || ObjectUtils.isEmpty(request.getLicenseFileName())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_EMPTY_CCCD_AND_LICENSE);
-        }
+//        if (!Objects.equals(v.getStatus(), VehicleStatus.AVAILABLE.name())) {
+//            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_UNAVAILABLE);
+//        }
         List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(request.getVehicleId(), request.getStartDate(), request.getEndDate());
         if (!overlaps.isEmpty()) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);
@@ -132,9 +128,7 @@ public class UserServiceImpl implements UserService {
         //Neu nhu dung email roi -> thu hoi token cua email hien tai
         revokeAllUserTokens(user);
         String newToken = jwtService.generateToken(user);
-        // Tự động lấy port từ request header
-        String frontendUrl = SecurityUtils.extractFrontendUrl(httpServletRequest);
-        String resetUrl = frontendUrl + "/forgotPassword?token=";
+        String resetUrl = "http://localhost:5173/forgotPassword?token=";
         publisher.publishEvent(new PasswordResetEvent(user, resetUrl, newToken));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(newToken);
@@ -146,7 +140,7 @@ public class UserServiceImpl implements UserService {
         Token theToken = tokenRepository.findByAccessToken(token)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
         if ("ACTIVE".equals(theToken.getUser().getFlagActive())) {
-            return "User has been verified";
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_VERIFIED);
         }
         if (jwtService.isTokenValid(theToken.getAccessToken(), theToken.getUser())
                 && "INACTIVE".equals(theToken.getUser().getFlagActive())) {
