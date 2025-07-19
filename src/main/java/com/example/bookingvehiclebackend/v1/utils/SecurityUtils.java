@@ -34,6 +34,8 @@ public class SecurityUtils {
                 .orElse(false);
     }
 
+
+
     public static String extractFrontendUrl(HttpServletRequest request) {
         // Thử lấy từ Origin header trước
         String origin = request.getHeader("Origin");

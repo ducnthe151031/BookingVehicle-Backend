@@ -116,10 +116,17 @@ public class UserController {
         rr.setStatus("PENDING");
         // Cập nhật trạng thái xe thành "rented"
         Vehicle v = vehicleRepository.findById(rr.getVehicleId())
+
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         v.setStatus("PENDING");
         vehicleRepository.save(v);
         String frontendUrl = "http://localhost:5173";
+
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        v.setStatus("PENDING");
+        vehicleRepository.save(v);
+        String frontendUrl = SecurityUtils.extractFrontendUrl(request);
+
         // Chuyển hướng về trang home
         response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
     }
@@ -135,7 +142,11 @@ public class UserController {
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         v.setStatus("AVAILABLE");
         vehicleRepository.save(v);
+
         String frontendUrl = "http://localhost:5173";
+
+        String frontendUrl = SecurityUtils.extractFrontendUrl(request);
+
         // Chuyển hướng về trang home
         response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
     }
