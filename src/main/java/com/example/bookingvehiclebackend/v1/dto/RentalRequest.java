@@ -73,4 +73,5 @@ public class RentalRequest {
     private LocalDateTime returnDate;
     @Column(name = "delivery_status", length = 100)
     private String deliveryStatus;
+
 }
