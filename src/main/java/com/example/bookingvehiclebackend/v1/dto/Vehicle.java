@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "vehicles", schema = "vehicle_rental_system")
+@Table(name = "vehicles", schema = "bookingcar")
 public class Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,8 +23,8 @@ public class Vehicle {
     @Column(name = "vehicle_name", length = 100)
     private String vehicleName;
 
-    @Column(name = "brand_id", length = 100)
-    private String brandId;
+    @Column(name = "branch_id", length = 100)
+    private String branchId;
 
     @Column(name = "category_id", length = 100)
     private String categoryId; // Ví dụ: "SUV", "Sedan", "7 chỗ", ...
@@ -48,7 +48,7 @@ public class Vehicle {
     @Column(name = "status", length = 100)
     private String status; // AVAILABLE, PENDING ,RENTED
 
-    @Column(name = "image_url", length = 100)
+    @Column(name = "image_url")
     private String imageUrl;
 
     @Column(name = "created_at")
@@ -69,7 +69,7 @@ public class Vehicle {
     @Column(name = "location", length = 100)
     private String location;
 
-    @Column(name = "registration_document_url", length = 255) // Stores the URL of the registration document image
+    @Column(name = "registration_document_url") // Stores the URL of the registration document image
     private String registrationDocumentUrl;
 
     @Column(name = "approved") // Boolean flag for approval status
