@@ -19,7 +19,7 @@ public interface AdminService {
 
     Object approveBooking(String id);
 
-    Object searchVehicles(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
+    Object searchVehicles(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status,String fuelType);
 
     Object viewVehicle(String id);
 
@@ -27,7 +27,7 @@ public interface AdminService {
 
     void deleteVehicle(CreateVehicleRequest request);
 
-    Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
+    Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status,String fuelType);
 
     List<VehicleType> vehicleTypeList();
 
@@ -35,7 +35,7 @@ public interface AdminService {
 
     void approveVehicle(CreateVehicleRequest request);
 
-    Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
+    Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status,String fuelType);
 
     Object createBrand(Brand brand);
 
@@ -57,4 +57,6 @@ public interface AdminService {
     Object updateUserRole(String id, User user);
 
     void rejectVehicle(CreateVehicleRequest request);
+
+    Object returnedBooking(String id);
 }

@@ -1,12 +1,12 @@
 package com.example.bookingvehiclebackend.v1.controller;
 
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
-import com.example.bookingvehiclebackend.v1.dto.Brand;
-import com.example.bookingvehiclebackend.v1.dto.Category;
-import com.example.bookingvehiclebackend.v1.dto.User;
-import com.example.bookingvehiclebackend.v1.dto.VehicleType;
+import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.CouponRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
+import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
+import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
+import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -24,7 +24,10 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
@@ -33,6 +36,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
+    private final VehicleRepository vehicleRepository;
 
     //test
     @PostMapping("/cars")
@@ -58,9 +62,30 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/vehicles/{id}/images")
+    public ResponseEntity<List<String>> getVehicleImages(@PathVariable String id) {
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new PvrsClientException(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+
+        if (vehicle.getImageUrl() == null || vehicle.getImageUrl().isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
+        List<String> imageUrls = Arrays.stream(vehicle.getImageUrl().split(","))
+                .map(url -> url.startsWith("http") ? url : "/uploads/images/" + url)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(imageUrls);
+    }
+
     @PutMapping("/approve-booking/{id}")
     public BaseApiResponse<?> approveBooking(@PathVariable String id) {
         return BaseApiResponse.succeed(adminService.approveBooking(id));
+    }
+
+    @PutMapping("/approve-returned-booking/{id}")
+    public BaseApiResponse<?> returnedBooking(@PathVariable String id) {
+        return BaseApiResponse.succeed(adminService.returnedBooking(id));
     }
     @PutMapping("/reject-booking/{id}")
     public BaseApiResponse<?> rejectBooking(@PathVariable String id) {
@@ -118,10 +143,12 @@ public class AdminController {
             @RequestParam(required = false) String vehicleName,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String fuelType
+
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status));
+        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
     }
 
     @GetMapping("/list/approved")
@@ -133,10 +160,12 @@ public class AdminController {
             @RequestParam(required = false) String vehicleName,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String fuelType
+
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.searchVehiclesIsApproved(brands, categories, vehicleName, startDate, endDate, pageable, status));
+        return BaseApiResponse.succeed(adminService.searchVehiclesIsApproved(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
     }
 
     @GetMapping("/brand-list")
@@ -195,9 +224,10 @@ public class AdminController {
             @RequestParam(required = false) String vehicleName,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String fuelType
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.rentalList(brands, categories, vehicleName, startDate, endDate, pageable, status));
+        return BaseApiResponse.succeed(adminService.rentalList(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
     }
 }
