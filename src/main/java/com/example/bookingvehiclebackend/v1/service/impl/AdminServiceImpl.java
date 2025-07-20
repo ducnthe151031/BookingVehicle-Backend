@@ -40,7 +40,6 @@ public class AdminServiceImpl implements AdminService {
 
     private final RentalRequestRepository rentalRequestRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
-    private final UserRepository userRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -57,7 +56,7 @@ public class AdminServiceImpl implements AdminService {
         }
         Vehicle vehicle = new Vehicle();
         vehicle.setVehicleName(request.getName());
-        vehicle.setBrandId(request.getBrand());
+        vehicle.setBranchId(request.getBrand());
         vehicle.setCategoryId(request.getCategory());
         vehicle.setFuelType(request.getType());
         vehicle.setSeatCount(request.getSeats());
@@ -74,7 +73,7 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
-        vehicle.setApproved(null);
+        vehicle.setApproved(false);
 
 
 
@@ -182,7 +181,7 @@ public class AdminServiceImpl implements AdminService {
 
                 // Điều kiện cơ bản
                 if (brands != null && !brands.isEmpty()) {
-                    predicates.add(root.get("brandId").in(brands));
+                    predicates.add(root.get("branchId").in(brands));
                 }
                 if (categories != null && !categories.isEmpty()) {
                     predicates.add(root.get("categoryId").in(categories));
@@ -216,7 +215,7 @@ public class AdminServiceImpl implements AdminService {
     public Object updateVehicle(CreateVehicleRequest request) throws IOException {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setVehicleName(request.getName());
-        vehicle.setBrandId(request.getBrand());
+        vehicle.setBranchId(request.getBrand());
         vehicle.setCategoryId(request.getCategory());
         vehicle.setFuelType(request.getType());
         vehicle.setSeatCount(request.getSeats());
@@ -230,7 +229,7 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
-        vehicle.setApproved(null);
+        vehicle.setApproved(false);
 
 
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
@@ -325,7 +324,6 @@ public class AdminServiceImpl implements AdminService {
     public void approveVehicle(CreateVehicleRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setApproved(true);
-        vehicle.setReason("");
         vehicleRepository.save(vehicle);
     }
 
@@ -376,7 +374,7 @@ public class AdminServiceImpl implements AdminService {
                 predicates.add(root.get("approved").in(true));
 
                 if (brands != null && !brands.isEmpty()) {
-                    predicates.add(root.get("brandId").in(brands));
+                    predicates.add(root.get("branchId").in(brands));
                 }
                 if (categories != null && !categories.isEmpty()) {
                     predicates.add(root.get("categoryId").in(categories));
@@ -399,71 +397,5 @@ public class AdminServiceImpl implements AdminService {
 
         Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
         return page;
-    }
-
-    @Override
-    public Object createBrand(Brand brand) {
-        return brandRepository.save(brand);
-    }
-
-    @Override
-    public Object updateBrand(String id, Brand brand) {
-        Brand brand1 = brandRepository.findById(id).orElse(null);
-
-        assert brand1 != null;
-        brand1.setName(brand.getName());
-        return brandRepository.save(brand1);
-    }
-
-    @Override
-    public void deleteBrand(String id) {
-        brandRepository.deleteById(id);
-    }
-
-    @Override
-    public Object createCategory(Category category) {
-        return categoryRepository.save(category);
-    }
-
-    @Override
-    public Object updateCategory(String id, Category category) {
-        Category category1 = categoryRepository.findById(id).orElse(null);
-
-        assert category1 != null;
-        category1.setName(category.getName());
-        return categoryRepository.save(category1);
-    }
-
-    @Override
-    public void deleteCategory(String id) {
-        categoryRepository.deleteById(id);
-    }
-
-    @Override
-    public List<User> getUserList() {
-        return userRepository.findAll() ;
-    }
-
-
-
-    @Override
-    public void deleteUser(String id) {
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    public Object updateUserRole(String id, User user) {
-        User  user1 = userRepository.findById(id).orElse(null);
-        assert user1 != null;
-        user.setRole(user1.getRole());
-        return userRepository.save(user);
-    }
-
-    @Override
-    public void rejectVehicle(CreateVehicleRequest request) {
-        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-        vehicle.setApproved(false);
-        vehicle.setReason(request.getReason());
-        vehicleRepository.save(vehicle);
     }
 }

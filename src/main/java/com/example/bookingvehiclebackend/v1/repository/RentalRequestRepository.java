@@ -31,4 +31,6 @@ public interface RentalRequestRepository extends JpaRepository<RentalRequest, St
     Optional<RentalRequest> findByOrderCode(long orderCode);
     List<RentalRequest> findByVehicleId(String vehicleId);
 
+    List<RentalRequest> findByEndDateBeforeAndReturnDateIsNull(LocalDateTime endDate);
+
 }

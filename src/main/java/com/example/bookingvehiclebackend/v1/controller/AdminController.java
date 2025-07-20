@@ -3,9 +3,7 @@ package com.example.bookingvehiclebackend.v1.controller;
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.Brand;
 import com.example.bookingvehiclebackend.v1.dto.Category;
-import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.VehicleType;
-import com.example.bookingvehiclebackend.v1.dto.request.CouponRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -67,42 +65,10 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.rejectBooking(id));
     }
 
-    @GetMapping("/user-list")
-    public BaseApiResponse<List<User>> getUserList() {
-        return BaseApiResponse.succeed(adminService.getUserList());
-    }
-
-    @PutMapping("/user-list/{id}")
-    public BaseApiResponse<?> updateUserRole(@PathVariable String id, @RequestBody User user) {
-        return BaseApiResponse.succeed(adminService.updateUserRole(id,user));
-    }
-
-    @DeleteMapping("/user-list/{id}")
-    public BaseApiResponse<?> deleteUser(@PathVariable String id) {
-        adminService.deleteUser(id);
-        return BaseApiResponse.succeed();
-    }
     @GetMapping("/category-list")
     public BaseApiResponse<List<Category>> getCategoryList() {
         return BaseApiResponse.succeed(adminService.categoryList());
     }
-
-    @PostMapping("/category-list")
-    public BaseApiResponse<?> createCategory(@RequestBody Category category) {
-        return BaseApiResponse.succeed(adminService.createCategory(category));
-    }
-
-    @PutMapping("/category-list/{id}")
-    public BaseApiResponse<?> updateCategory(@PathVariable String id, @RequestBody Category category) {
-        return BaseApiResponse.succeed(adminService.updateCategory(id,category));
-    }
-
-    @DeleteMapping("/category-list/{id}")
-    public BaseApiResponse<?> deleteCategory(@PathVariable String id) {
-        adminService.deleteCategory(id);
-        return BaseApiResponse.succeed();
-    }
-
     @GetMapping("/vehicleType-list")
     public BaseApiResponse<List<VehicleType>> getVehicleTypeList() {
         return BaseApiResponse.succeed(adminService.vehicleTypeList());
@@ -144,22 +110,6 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.brandList());
     }
 
-    @PostMapping("/brand-list")
-    public BaseApiResponse<?> createBrand(@RequestBody Brand brand) {
-        return BaseApiResponse.succeed(adminService.createBrand(brand));
-    }
-
-    @PutMapping("/brand-list/{id}")
-    public BaseApiResponse<?> updateBrand(@PathVariable String id, @RequestBody Brand brand) {
-        return BaseApiResponse.succeed(adminService.updateBrand(id,brand));
-    }
-
-    @DeleteMapping("/brand-list/{id}")
-    public BaseApiResponse<?> deleteBrand(@PathVariable String id) {
-        adminService.deleteBrand(id) ;
-        return BaseApiResponse.succeed();
-    }
-
     @PutMapping("/view")
     public BaseApiResponse<?> viewVehicle(@RequestBody CreateVehicleRequest request) {
         return BaseApiResponse.succeed(adminService.viewVehicle(request.getId()));
@@ -178,12 +128,6 @@ public class AdminController {
     @DeleteMapping("/approve-vehicle")
     public BaseApiResponse<Void> approveVehicle(@RequestBody CreateVehicleRequest request) {
         adminService.approveVehicle(request);
-        return BaseApiResponse.succeed();
-    }
-
-    @DeleteMapping("/reject-vehicle")
-    public BaseApiResponse<Void> rejectVehicle(@RequestBody CreateVehicleRequest request) {
-        adminService.rejectVehicle(request);
         return BaseApiResponse.succeed();
     }
     @GetMapping("/rental-list")

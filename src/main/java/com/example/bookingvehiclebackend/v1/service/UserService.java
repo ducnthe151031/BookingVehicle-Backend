@@ -25,6 +25,8 @@ public interface UserService {
 
     Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
 
+
+
     Object getReviewsByVehicleId(String vehicleId, Pageable pageable);
 
     Object updateReview(String reviewId, UpdateReviewRequest request);
