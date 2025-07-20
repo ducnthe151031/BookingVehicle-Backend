@@ -2,6 +2,7 @@ package com.example.bookingvehiclebackend.v1.controller;
 
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
+import com.example.bookingvehiclebackend.v1.dto.DeliveryStatus;
 import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
 import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
@@ -102,20 +103,22 @@ public class UserController {
 
 
     @GetMapping("/payment/success")
-    public void handlePaymentSuccess(@RequestParam("orderCode") long orderCode, HttpServletResponse response) throws IOException {
+    public void handlePaymentSuccess(@RequestParam("orderCode") long orderCode, HttpServletResponse response, HttpServletRequest request) throws IOException {
         // Tìm rental request dựa trên orderCode
         RentalRequest rr = rentalRequestRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Rental request not found"));
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.RENTAL_REQUEST_NOT_FOUND));
         rr.setPaymentStatus(true);
         rr.setStatus("PENDING");
+        rr.setDeliveryStatus(DeliveryStatus.READY_TO_PICK.name());
         // Cập nhật trạng thái xe thành "rented"
         Vehicle v = vehicleRepository.findById(rr.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         v.setStatus("PENDING");
+        rr.setDeliveryStatus(DeliveryStatus.READY_TO_PICK.name());
         vehicleRepository.save(v);
-
+        String frontendUrl = "http://localhost:5173";
         // Chuyển hướng về trang home
-        response.sendRedirect("http://localhost:5173/home"); // Thay bằng domain thực tế của frontend
+        response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
     }
 
     @GetMapping("/payment/failed")
