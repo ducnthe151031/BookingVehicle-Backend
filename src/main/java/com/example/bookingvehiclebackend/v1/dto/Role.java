@@ -16,12 +16,13 @@ public enum Role {
             Permission.ADMIN_CREATE,
             Permission.ADMIN_DELETE
     )),
-    OWNER(Collections.emptySet());
+    OWNER(Collections.emptySet()),
+    OPERATOR(Collections.emptySet());
+
 
     Role(Set<Permission> permissions) {
         this.permissions = permissions;
     }
-
 
     private final Set<Permission> permissions;
 
