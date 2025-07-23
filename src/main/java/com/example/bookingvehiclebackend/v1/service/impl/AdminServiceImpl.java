@@ -1,7 +1,11 @@
 package com.example.bookingvehiclebackend.v1.service.impl;
 
+import com.example.bookingvehiclebackend.config.JwtService;
 import com.example.bookingvehiclebackend.v1.dto.*;
+import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
+import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
+import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.*;
@@ -9,19 +13,23 @@ import com.example.bookingvehiclebackend.v1.service.AdminService;
 import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -33,6 +41,8 @@ import java.util.UUID;
 public class AdminServiceImpl implements AdminService {
 
     private final CategoryRepository categoryRepository;
+    private final JwtService jwtService;
+    private final ApplicationEventPublisher publisher;
 
     private final BrandRepository brandRepository;
 
@@ -40,6 +50,8 @@ public class AdminServiceImpl implements AdminService {
 
     private final RentalRequestRepository rentalRequestRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -73,24 +85,48 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
-        vehicle.setApproved(false);
+        vehicle.setApproved(null);
 
 
 
         String imageUrlName = null;
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
-            byte[] imageUrl = Base64.getDecoder().decode(request.getImageUrl());
-            imageUrlName = saveImageToFileSystem(imageUrl); // Lưu ảnh và lấy đường dẫn
-            vehicle.setImageUrl(imageUrlName);
+            String[] imageParts = request.getImageUrl().split(",");
+            List<String> savedImageUrls = new ArrayList<>();
 
+            for (String imagePart : imageParts) {
+                try {
+                    byte[] imageBytes = Base64.getDecoder().decode(imagePart.trim());
+                    String fileName = saveImageToFileSystem(imageBytes);
+                    savedImageUrls.add(fileName);
+                } catch (IllegalArgumentException e) {
+                    // Nếu không phải base64, coi như là URL trực tiếp
+                    savedImageUrls.add(imagePart.trim());
+                }
+            }
+
+            // Lưu dưới dạng chuỗi ngăn cách bởi dấu phẩy
+            vehicle.setImageUrl(String.join(",", savedImageUrls));
         }
 
-        String registrationDocumentName = null;
-        if (request.getRegistrationDocumentUrl() != null && !request.getRegistrationDocumentUrl().isEmpty()) {
-            byte[] registrationDocument = Base64.getDecoder().decode(request.getRegistrationDocumentUrl());
-            registrationDocumentName = saveImageToFileSystem(registrationDocument); // Lưu ảnh và lấy đường dẫn
-            vehicle.setRegistrationDocumentUrl(registrationDocumentName);
 
+        if (request.getRegistrationDocumentUrl() != null && !request.getRegistrationDocumentUrl().isEmpty()) {
+            String[] imageParts = request.getRegistrationDocumentUrl().split(",");
+            List<String> savedImageUrls = new ArrayList<>();
+
+            for (String imagePart : imageParts) {
+                try {
+                    byte[] imageBytes = Base64.getDecoder().decode(imagePart.trim());
+                    String fileName = saveImageToFileSystem(imageBytes);
+                    savedImageUrls.add(fileName);
+                } catch (IllegalArgumentException e) {
+                    // Nếu không phải base64, coi như là URL trực tiếp
+                    savedImageUrls.add(imagePart.trim());
+                }
+            }
+
+            // Lưu dưới dạng chuỗi ngăn cách bởi dấu phẩy
+            vehicle.setRegistrationDocumentUrl(String.join(",", savedImageUrls));
         }
 
 
@@ -126,10 +162,11 @@ public class AdminServiceImpl implements AdminService {
     public Object approveBooking(String id) {
         RentalRequest booking = rentalRequestRepository.findById(id)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-        if (!RentalStatus.PENDING.name().equals(booking.getStatus())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
-        }
+//        if (!RentalStatus.PENDING.name().equals(booking.getStatus())) {
+//            throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
+//        }
         booking.setStatus(RentalStatus.APPROVED.name());
+        booking.setDeliveryStatus(DeliveryStatus.TRANSIT.name());
         Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
         assert vehicle != null;
         vehicle.setStatus("RENTED");
@@ -137,7 +174,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Object searchVehicles(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
+    public Object searchVehicles(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status,String fuelType) {
         Specification<Vehicle> spec = new Specification<Vehicle>() {
             @Override
             public Predicate toPredicate(Root<Vehicle> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
@@ -198,6 +235,10 @@ public class AdminServiceImpl implements AdminService {
                     predicates.add(cb.not(root.get("id").in(subquery)));
                 }
 
+                if (StringUtils.hasText(fuelType)) {
+                    predicates.add(cb.equal(root.get("fuelType"), fuelType));
+                }
+
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
         };
@@ -229,34 +270,49 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setGearBox(request.getGearbox());
         vehicle.setLocation(request.getLocation());
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
-        vehicle.setApproved(false);
+        vehicle.setApproved(null);
+
 
 
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
-            try {
-                byte[] imageUrl = Base64.getDecoder().decode(request.getImageUrl());
-                String imageUrlName = saveImageToFileSystem(imageUrl); // Lưu ảnh và lấy đường dẫn
-                vehicle.setImageUrl(imageUrlName);
+            String[] imageParts = request.getImageUrl().split(",");
+            List<String> savedImageUrls = new ArrayList<>();
 
-            } catch (IllegalArgumentException e)
-            {
-                vehicle.setImageUrl(request.getImageUrl());
-
+            for (String imagePart : imageParts) {
+                try {
+                    byte[] imageBytes = Base64.getDecoder().decode(imagePart.trim());
+                    String fileName = saveImageToFileSystem(imageBytes);
+                    savedImageUrls.add(fileName);
+                } catch (IllegalArgumentException e) {
+                    // Nếu không phải base64, coi như là URL trực tiếp
+                    savedImageUrls.add(imagePart.trim());
+                }
             }
+
+            // Lưu dưới dạng chuỗi ngăn cách bởi dấu phẩy
+            vehicle.setImageUrl(String.join(",", savedImageUrls));
         }
 
         if (request.getRegistrationDocumentUrl() != null && !request.getRegistrationDocumentUrl().isEmpty()) {
-            try {
-                byte[] registrationDocument = Base64.getDecoder().decode(request.getRegistrationDocumentUrl());
-                String registrationDocumentName = saveImageToFileSystem(registrationDocument); // Lưu ảnh và lấy đường dẫn
-                vehicle.setRegistrationDocumentUrl(registrationDocumentName);
+            String[] imageParts = request.getRegistrationDocumentUrl().split(",");
+            List<String> savedImageUrls = new ArrayList<>();
 
-            } catch (IllegalArgumentException e)
-            {
-                vehicle.setRegistrationDocumentUrl(request.getRegistrationDocumentUrl());
-
+            for (String imagePart : imageParts) {
+                try {
+                    byte[] imageBytes = Base64.getDecoder().decode(imagePart.trim());
+                    String fileName = saveImageToFileSystem(imageBytes);
+                    savedImageUrls.add(fileName);
+                } catch (IllegalArgumentException e) {
+                    // Nếu không phải base64, coi như là URL trực tiếp
+                    savedImageUrls.add(imagePart.trim());
+                }
             }
+
+            // Lưu dưới dạng chuỗi ngăn cách bởi dấu phẩy
+            vehicle.setRegistrationDocumentUrl(String.join(",", savedImageUrls));
         }
+
+
 
 
         return vehicleRepository.save(vehicle);
@@ -271,7 +327,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
+    public Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType) {
         return rentalRequestRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.get("paymentStatus"), true));
@@ -314,6 +370,7 @@ public class AdminServiceImpl implements AdminService {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.BOOKING_IS_NOT_PENDING_STATUS);
         }
         booking.setStatus(RentalStatus.REJECTED.name());
+        booking.setDeliveryStatus(null);
         Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
         assert vehicle != null;
         vehicle.setStatus("AVAILABLE");
@@ -324,11 +381,14 @@ public class AdminServiceImpl implements AdminService {
     public void approveVehicle(CreateVehicleRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
         vehicle.setApproved(true);
+        vehicle.setReason("");
         vehicleRepository.save(vehicle);
     }
 
+
+
     @Override
-    public Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
+    public Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status,String fuelType) {
         Specification<Vehicle> spec = new Specification<Vehicle>() {
             @Override
             public Predicate toPredicate(Root<Vehicle> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
@@ -391,6 +451,9 @@ public class AdminServiceImpl implements AdminService {
                     predicates.add(cb.not(root.get("id").in(subquery)));
                 }
 
+                if (StringUtils.hasText(fuelType)) {
+                    predicates.add(cb.equal(root.get("fuelType"), fuelType));
+                }
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
         };
@@ -398,4 +461,149 @@ public class AdminServiceImpl implements AdminService {
         Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
         return page;
     }
+
+    @Override
+    public Object createBrand(Brand brand) {
+        return brandRepository.save(brand);
+    }
+
+    @Override
+    public Object updateBrand(String id, Brand brand) {
+        Brand brand1 = brandRepository.findById(id).orElse(null);
+
+        assert brand1 != null;
+        brand1.setName(brand.getName());
+        return brandRepository.save(brand1);
+    }
+
+    @Override
+    public void deleteBrand(String id) {
+        brandRepository.deleteById(id);
+    }
+
+    @Override
+    public Object createCategory(Category category) {
+        return categoryRepository.save(category);
+    }
+
+    @Override
+    public Object updateCategory(String id, Category category) {
+        Category category1 = categoryRepository.findById(id).orElse(null);
+
+        assert category1 != null;
+        category1.setName(category.getName());
+        return categoryRepository.save(category1);
+    }
+
+    @Override
+    public void deleteCategory(String id) {
+        categoryRepository.deleteById(id);
+    }
+
+    @Override
+    public List<User> getUserList() {
+        return userRepository.findAll() ;
+    }
+
+
+
+    @Override
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public Object updateUserRole(String id, User user) {
+        User  user1 = userRepository.findById(id).orElse(null);
+        assert user1 != null;
+        user.setRole(user1.getRole());
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void rejectVehicle(CreateVehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        vehicle.setApproved(false);
+        vehicle.setReason(request.getReason());
+        vehicleRepository.save(vehicle);
+    }
+
+    @Override
+    public Object returnedBooking(String id) {
+        RentalRequest booking = rentalRequestRepository.findById(id)
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+
+        booking.setReturnDate(LocalDateTime.now());
+        booking.setStatus(RentalStatus.AVAILABLE.name());
+        booking.setDeliveryStatus(DeliveryStatus.RETURNED.name());
+        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+        assert vehicle != null;
+        vehicle.setStatus("AVAILABLE");
+        return rentalRequestRepository.save(booking);    }
+
+    @Override
+    public Object deliveredBooking(String id) {
+        RentalRequest booking = rentalRequestRepository.findById(id)
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+
+        booking.setStatus(RentalStatus.AVAILABLE.name());
+        booking.setDeliveryStatus(DeliveryStatus.DELIVERED.name());
+        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+        assert vehicle != null;
+        vehicle.setStatus("RENTED");
+        return rentalRequestRepository.save(booking);
+    }
+
+    @Override
+    public Object getListUser() {
+        return null;
+    }
+
+    @Override
+    public Object createUserList(AuthenRequest request,HttpServletRequest httpServletRequest) {
+        String password = request.getPassword();
+        if (!isValidPassword(password)) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.INVALID_PASSWORD_FORMAT);
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_IS_EXISTED);
+        }
+        if (ObjectUtils.isEmpty(request.getEmail())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
+        }
+
+        // Khi user dang ki chua xac thuc mail -> flagActive = INACTIVE
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setCreatedAt(Instant.now());
+//        user.setFlagActive("ACTIVE");
+        user.setFlagActive("INACTIVE");
+        user.setRole(request.getRole());
+        userRepository.save(user);
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        // Sau khi dang ki thanh cong, can xac thuc qua email
+        publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(httpServletRequest), jwtToken));
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setToken(jwtToken);
+        loginResponse.setRefreshToken(refreshToken);
+        return loginResponse;
+
+    }
+
+    private boolean isValidPassword(String password) {
+        // Ít nhất 1 chữ hoa, 1 chữ số và 1 ký tự đặc biệt
+        String regex = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&^#()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/~`]).{8,}$";
+        return password != null && password.matches(regex);
+    }
+    public String applicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
 }
+
+
