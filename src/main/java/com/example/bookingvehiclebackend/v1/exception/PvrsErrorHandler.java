@@ -33,9 +33,7 @@ public enum PvrsErrorHandler implements IPvrsErrorHandler{
     NOT_REVIEW_AUTHOR("MEA000026", "Bạn không có quyền thực hiện hành động này với đánh giá của người khác."),
     INVALID_RATING("MEA000027", "Điểm đánh giá phải từ 1 đến 5."),
     COUPON_NOT_FOUND("MEA000028", "Coupon không tồn tại"),
-    COUPON_IS_EXISTED("MEA000029", "Mã coupon đã tồn tại"),
-    INVALID_PASSWORD_FORMAT("MEA000030", "Password must contain at least one uppercase letter, one digit, and one special character."),
-    NOT_EMPTY_CCCD_AND_LICENSE("MEA000031","Vui lòng cập nhật thông tin CCCD và bằng lái xe");
+    COUPON_IS_EXISTED("MEA000029", "Mã coupon đã tồn tại");
 
 
     ;
