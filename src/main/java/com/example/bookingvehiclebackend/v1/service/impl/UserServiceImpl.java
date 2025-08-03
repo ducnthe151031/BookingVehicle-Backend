@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
         long orderCode = System.currentTimeMillis();
         rr.setOrderCode(orderCode);
         int totalPrice = request.getTotalPrice().intValue();
-        PayOS payOS = new PayOS("28d524ef-8aec-43d0-ba0e-63864d087143","96863744-e699-400b-a24f-92bcc9c093c3","2bfbc44cb1c00d1f4d0752e86b5665ff341f856604c9009300a458320aca1b4f") ;
+        PayOS payOS = new PayOS("65f3da88-9fa3-4ef3-8a5d-9393a14d3b84","c0473543-c34c-4601-8f23-88fc7fec2645","f3d3ea900cf6dd94e57b86b3c09ae3946ab397569ea3a930559a1c2a0797f25f") ;
         PaymentData paymentData = PaymentData.builder()
                 .orderCode(orderCode)
                 .amount(totalPrice)
@@ -372,6 +372,30 @@ public class UserServiceImpl implements UserService {
 
         return average;
     }
+
+
+    @Override
+    public Object payLateFee(String id) throws Exception {
+        long orderCode = System.currentTimeMillis();
+        RentalRequest request = rentalRequestRepository.getReferenceById(id) ;
+        request.setOrderCode(orderCode);
+        User user = userRepository.getReferenceById(request.getCustomerId()) ;
+        PayOS payOS = new PayOS("65f3da88-9fa3-4ef3-8a5d-9393a14d3b84","c0473543-c34c-4601-8f23-88fc7fec2645","f3d3ea900cf6dd94e57b86b3c09ae3946ab397569ea3a930559a1c2a0797f25f") ;
+        PaymentData paymentData = PaymentData.builder()
+                .orderCode(orderCode)
+                .amount(request.getLateFee().intValue())
+                .description("Thanh toán phí muộn " + user.getUsername())
+                .returnUrl("http://localhost:8080/v1/user/late/success?orderCode=" + orderCode) // Nếu thanh toán thành công
+                .cancelUrl("http://localhost:8080/v1/user/late/failed?orderCode=" + orderCode) // Nếu hủy không thanh toán
+                .build();
+
+        request.setUrl(payOS.createPaymentLink(paymentData).getCheckoutUrl());
+
+
+        return rentalRequestRepository.save(request);
+    }
+
+
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())

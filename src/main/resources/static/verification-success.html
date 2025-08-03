@@ -4,9 +4,68 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Email Verification Success</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset CSS cơ bản */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif; /* Sử dụng font Roboto đẹp hơn */
+      background-color: #f4f7f6; /* Màu nền nhẹ nhàng */
+      display: flex; /* Dùng flexbox để căn giữa nội dung */
+      justify-content: center; /* Căn giữa theo chiều ngang */
+      align-items: center; /* Căn giữa theo chiều dọc */
+      min-height: 100vh; /* Đảm bảo chiều cao tối thiểu là toàn bộ màn hình */
+      color: #333; /* Màu chữ chính */
+    }
+
+    .container {
+      background-color: #ffffff; /* Nền trắng cho hộp nội dung */
+      padding: 40px; /* Khoảng đệm bên trong */
+      border-radius: 10px; /* Bo góc nhẹ nhàng */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Đổ bóng tạo chiều sâu */
+      text-align: center; /* Căn giữa văn bản */
+      max-width: 500px; /* Giới hạn chiều rộng tối đa */
+      width: 90%; /* Chiều rộng tương đối */
+      box-sizing: border-box; /* Đảm bảo padding không làm tràn width */
+    }
+
+    h1 {
+      color: #28a745; /* Màu xanh lá cây cho tiêu đề thành công */
+      font-size: 2.5em; /* Kích thước tiêu đề lớn hơn */
+      margin-bottom: 20px; /* Khoảng cách dưới tiêu đề */
+      font-weight: 700; /* Tiêu đề đậm */
+    }
+
+    p {
+      font-size: 1.1em; /* Kích thước chữ to hơn một chút */
+      line-height: 1.6; /* Chiều cao dòng để dễ đọc */
+      margin-bottom: 30px; /* Khoảng cách dưới đoạn văn bản */
+    }
+
+    .icon {
+      font-size: 4em; /* Kích thước icon lớn */
+      color: #28a745; /* Màu xanh lá cây cho icon */
+      margin-bottom: 20px; /* Khoảng cách dưới icon */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+      h1 {
+        font-size: 2em;
+      }
+      p {
+        font-size: 1em;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Email Verification Successful</h1>
-<p>Thank you for verifying your email. Your account has been activated!</p>
+<div class="container">
+  <div class="icon">&#10003;</div> <h1>Email Verification Successful</h1>
+  <p>Thank you for verifying your email. Your account has been activated!</p>
 </body>
 </html>

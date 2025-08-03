@@ -68,6 +68,7 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setOwnerId(Role.OWNER.equals(user.getRole()) ? user.getId() : null);
         vehicle.setLiecensePlate(request.getLicensePlate());
         vehicle.setCreatedBy(user.getUsername());
+        vehicle.setUserId(user.getId());
         vehicle.setCreatedAt(LocalDateTime.now());
         vehicle.setDescription(request.getDescription());
         vehicle.setGearBox(request.getGearbox());
@@ -180,6 +181,8 @@ public class AdminServiceImpl implements AdminService {
                 }
 
                 // Điều kiện cơ bản
+
+
                 if (brands != null && !brands.isEmpty()) {
                     predicates.add(root.get("branchId").in(brands));
                 }
@@ -398,4 +401,235 @@ public class AdminServiceImpl implements AdminService {
         Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
         return page;
     }
+
+
+    @Override
+    public Object createBrand(Brand brand) {
+        return brandRepository.save(brand);
+    }
+
+    @Override
+    public Object updateBrand(String id, Brand brand) {
+        Brand brand1 = brandRepository.findById(id).orElse(null);
+
+        assert brand1 != null;
+        brand1.setName(brand.getName());
+        return brandRepository.save(brand1);
+    }
+
+    @Override
+    public void deleteBrand(String id) {
+        brandRepository.deleteById(id);
+    }
+
+    @Override
+    public Object createCategory(Category category) {
+        return categoryRepository.save(category);
+    }
+
+    @Override
+    public Object updateCategory(String id, Category category) {
+        Category category1 = categoryRepository.findById(id).orElse(null);
+
+        assert category1 != null;
+        category1.setName(category.getName());
+        return categoryRepository.save(category1);
+    }
+
+    @Override
+    public void deleteCategory(String id) {
+        categoryRepository.deleteById(id);
+    }
+
+    @Override
+    public List<User> getUserList() {
+        return userRepository.findAll() ;
+    }
+
+
+
+    @Override
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public Object updateUserRole(String id, User user) {
+        User  user1 = userRepository.findById(id).orElse(null);
+        assert user1 != null;
+        user.setRole(user1.getRole());
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void rejectVehicle(CreateVehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(request.getId()).orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+        vehicle.setApproved(false);
+        vehicle.setReason(request.getReason());
+        vehicleRepository.save(vehicle);
+    }
+
+    @Override
+    public Object returnedBooking(String id) {
+        RentalRequest booking = rentalRequestRepository.findById(id)
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+
+        booking.setReturnDate(LocalDateTime.now());
+        booking.setStatus(RentalStatus.AVAILABLE.name());
+        booking.setDeliveryStatus(DeliveryStatus.RETURNED.name());
+        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+        assert vehicle != null;
+        vehicle.setStatus("AVAILABLE");
+        return rentalRequestRepository.save(booking);    }
+
+    @Override
+    public Object deliveredBooking(String id) {
+        RentalRequest booking = rentalRequestRepository.findById(id)
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+
+        booking.setStatus(RentalStatus.AVAILABLE.name());
+        booking.setDeliveryStatus(DeliveryStatus.DELIVERED.name());
+        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+        assert vehicle != null;
+        vehicle.setStatus("RENTED");
+        return rentalRequestRepository.save(booking);
+    }
+
+    @Override
+    public Object getListUser() {
+        return null;
+    }
+
+    @Override
+    public Object createUserList(AuthenRequest request,HttpServletRequest httpServletRequest) {
+        String password = request.getPassword();
+        if (!isValidPassword(password)) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.INVALID_PASSWORD_FORMAT);
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_EXISTED);
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_IS_EXISTED);
+        }
+        if (ObjectUtils.isEmpty(request.getEmail())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
+        }
+
+        // Khi user dang ki chua xac thuc mail -> flagActive = INACTIVE
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setCreatedAt(Instant.now());
+//        user.setFlagActive("ACTIVE");
+        user.setFlagActive("INACTIVE");
+        user.setRole(request.getRole());
+        userRepository.save(user);
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        // Sau khi dang ki thanh cong, can xac thuc qua email
+        publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(httpServletRequest), jwtToken));
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setToken(jwtToken);
+        loginResponse.setRefreshToken(refreshToken);
+        return loginResponse;
+
+    }
+
+    @Override
+    public Object searchVehiclesByUser(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType) {
+        Specification<Vehicle> spec = new Specification<Vehicle>() {
+            @Override
+            public Predicate toPredicate(Root<Vehicle> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                List<Predicate> predicates = new ArrayList<>();
+
+                // Subquery để kiểm tra xung đột thời gian
+                Subquery<String> subquery = query.subquery(String.class);
+                Root<RentalRequest> rentalRequestRoot = subquery.from(RentalRequest.class);
+                subquery.select(rentalRequestRoot.get("vehicleId"));
+
+                // Sử dụng giá trị startDate và endDate trực tiếp thay vì tham số
+                if (startDate != null && endDate != null) {
+                    subquery.where(cb.and(
+                            cb.equal(rentalRequestRoot.get("vehicleId"), root.get("id")),
+                            cb.or(
+                                    // Xung đột khi startDate nằm trong khoảng đã thuê
+                                    cb.and(
+                                            cb.greaterThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("startDate")),
+                                            cb.lessThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("endDate"))
+                                    ),
+                                    // Xung đột khi endDate nằm trong khoảng đã thuê
+                                    cb.and(
+                                            cb.greaterThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("startDate")),
+                                            cb.lessThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("endDate"))
+                                    ),
+                                    // Xung đột khi khoảng thời gian bao phủ toàn bộ khoảng đã thuê
+                                    cb.and(
+                                            cb.lessThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("startDate")),
+                                            cb.greaterThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("endDate"))
+                                    )
+                            ),
+                            cb.notEqual(rentalRequestRoot.get("status"), "CANCELLED") // Loại bỏ các yêu cầu đã hủy
+                    ));
+                } else {
+                    // Nếu không có startDate hoặc endDate, không áp dụng điều kiện thời gian
+                    subquery.where(cb.and(
+                            cb.equal(rentalRequestRoot.get("vehicleId"), root.get("id")),
+                            cb.notEqual(rentalRequestRoot.get("status"), "CANCELLED")
+                    ));
+                }
+
+                // Điều kiện cơ bản
+                User currentUser = SecurityUtils.getCurrentUser()
+                        .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+                predicates.add(root.get("userId").in(currentUser.getId()));
+
+
+                if (brands != null && !brands.isEmpty()) {
+                    predicates.add(root.get("branchId").in(brands));
+                }
+                if (categories != null && !categories.isEmpty()) {
+                    predicates.add(root.get("categoryId").in(categories));
+                }
+                if (StringUtils.hasText(vehicleName)) {
+                    predicates.add(cb.like(cb.lower(root.get("vehicleName")), "%" + vehicleName.toLowerCase() + "%"));
+                }
+                if (StringUtils.hasText(status)) {
+                    predicates.add(cb.equal(root.get("status"), status));
+                }
+
+                // Thêm điều kiện không có xung đột thời gian
+                if (startDate != null && endDate != null) {
+                    predicates.add(cb.not(root.get("id").in(subquery)));
+                }
+
+                if (StringUtils.hasText(fuelType)) {
+                    predicates.add(cb.equal(root.get("fuelType"), fuelType));
+                }
+
+
+
+                return cb.and(predicates.toArray(new Predicate[0]));
+            }
+        };
+
+        Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
+        return page;
+    }
+
+    private boolean isValidPassword(String password) {
+        // Ít nhất 1 chữ hoa, 1 chữ số và 1 ký tự đặc biệt
+        String regex = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&^#()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/~`]).{8,}$";
+        return password != null && password.matches(regex);
+    }
+    public String applicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
 }
+
+
+
+
+}
+

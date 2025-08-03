@@ -1,5 +1,6 @@
 package com.example.bookingvehiclebackend.v1.schedule;
 
+import com.example.bookingvehiclebackend.v1.dto.DeliveryStatus;
 import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
 import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
@@ -31,7 +32,7 @@ public class LateReturnCheckService {
                 System.out.println(">>> Đang test scheduler: " + LocalDateTime.now());
                 rental.setLate(true);
                 calculateLateFee(rental);
-
+                rental.setDeliveryStatus(DeliveryStatus.RETURNED.name());
                 rentalRequestRepository.save(rental);
 
                 // Gửi thông báo cho người dùng
@@ -44,7 +45,7 @@ public class LateReturnCheckService {
         Vehicle vehicle = vehicleRepository.findById(rental.getVehicleId())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
 
-        BigDecimal calculatedFee = vehicle.getPricePerHour().multiply(new BigDecimal(hoursLate));
+        BigDecimal calculatedFee = vehicle.getPricePerDay().multiply(new BigDecimal(hoursLate));
         rental.setLateFee(calculatedFee);
     }
 }

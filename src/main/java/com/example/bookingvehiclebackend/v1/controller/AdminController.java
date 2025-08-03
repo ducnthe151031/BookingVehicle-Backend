@@ -78,7 +78,7 @@ public class AdminController {
     @GetMapping("/list")
     public BaseApiResponse<?> getVehicleList(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "100") int size,
             @RequestParam(required = false) List<String> brands,
             @RequestParam(required = false) List<String> categories,
             @RequestParam(required = false) String vehicleName,
@@ -88,6 +88,24 @@ public class AdminController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status));
+    }
+
+    @GetMapping("/listByUser")
+    public BaseApiResponse<?> getVehicleListByUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size,
+            @RequestParam(required = false) List<String> brands,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) String vehicleName,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String fuelType
+
+
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return BaseApiResponse.succeed(adminService.searchVehiclesByUser(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
     }
 
     @GetMapping("/list/approved")

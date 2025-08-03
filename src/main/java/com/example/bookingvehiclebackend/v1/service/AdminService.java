@@ -34,5 +34,41 @@ public interface AdminService {
 
     void approveVehicle(CreateVehicleRequest request);
 
+
+    Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status,String fuelType);
+
+    Object createBrand(Brand brand);
+
+    Object updateBrand(String id, Brand brand);
+
+    void deleteBrand(String id);
+
+    Object createCategory(Category category);
+
+    Object updateCategory(String id, Category category);
+
+    void deleteCategory(String id);
+
+    List<User> getUserList();
+
+
+    void deleteUser(String id);
+
+    Object updateUserRole(String id, User user);
+
+    void rejectVehicle(CreateVehicleRequest request);
+
+    Object returnedBooking(String id);
+
+    Object deliveredBooking(String id);
+
+    Object getListUser();
+
+    Object createUserList(AuthenRequest request, HttpServletRequest httpServletRequest);
+
+    Object searchVehiclesByUser(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType);
+}
+
     Object searchVehiclesIsApproved(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
 }
+
