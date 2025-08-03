@@ -1,15 +1,11 @@
 package com.example.bookingvehiclebackend.v1.controller;
 
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
-import com.example.bookingvehiclebackend.v1.dto.*;
-import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
-import com.example.bookingvehiclebackend.v1.dto.request.CouponRequest;
+import com.example.bookingvehiclebackend.v1.dto.Brand;
+import com.example.bookingvehiclebackend.v1.dto.Category;
+import com.example.bookingvehiclebackend.v1.dto.VehicleType;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
-import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
-import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
-import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -26,10 +22,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
@@ -38,8 +31,6 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
-    private final VehicleRepository vehicleRepository;
-
 
     //test
     @PostMapping("/cars")
@@ -65,82 +56,19 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/vehicles/{id}/images")
-    public ResponseEntity<List<String>> getVehicleImages(@PathVariable String id) {
-        Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() -> new PvrsClientException(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-
-        if (vehicle.getImageUrl() == null || vehicle.getImageUrl().isEmpty()) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-
-        List<String> imageUrls = Arrays.stream(vehicle.getImageUrl().split(","))
-                .map(url -> url.startsWith("http") ? url : "/uploads/images/" + url)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(imageUrls);
-    }
-
     @PutMapping("/approve-booking/{id}")
     public BaseApiResponse<?> approveBooking(@PathVariable String id) {
         return BaseApiResponse.succeed(adminService.approveBooking(id));
-    }
-
-    @PutMapping("/approve-delivered-booking/{id}")
-    public BaseApiResponse<?> deliveredBooking(@PathVariable String id) {
-        return BaseApiResponse.succeed(adminService.deliveredBooking(id));
-    }
-
-    @PutMapping("/approve-returned-booking/{id}")
-    public BaseApiResponse<?> returnedBooking(@PathVariable String id) {
-        return BaseApiResponse.succeed(adminService.returnedBooking(id));
     }
     @PutMapping("/reject-booking/{id}")
     public BaseApiResponse<?> rejectBooking(@PathVariable String id) {
         return BaseApiResponse.succeed(adminService.rejectBooking(id));
     }
 
-    @GetMapping("/user-list")
-    public BaseApiResponse<List<User>> getUserList() {
-        return BaseApiResponse.succeed(adminService.getUserList());
-    }
-
-    @PostMapping("/user-list")
-    public BaseApiResponse<?> createUserList(@RequestBody AuthenRequest request,final HttpServletRequest httpServletRequest) {
-        return BaseApiResponse.succeed(adminService.createUserList(request,httpServletRequest));
-    }
-
-    @PutMapping("/user-list/{id}")
-    public BaseApiResponse<?> updateUserRole(@PathVariable String id, @RequestBody User user) {
-        return BaseApiResponse.succeed(adminService.updateUserRole(id,user));
-    }
-
-    @DeleteMapping("/user-list/{id}")
-    public BaseApiResponse<?> deleteUser(@PathVariable String id) {
-        adminService.deleteUser(id);
-        return BaseApiResponse.succeed();
-    }
     @GetMapping("/category-list")
     public BaseApiResponse<List<Category>> getCategoryList() {
         return BaseApiResponse.succeed(adminService.categoryList());
     }
-
-    @PostMapping("/category-list")
-    public BaseApiResponse<?> createCategory(@RequestBody Category category) {
-        return BaseApiResponse.succeed(adminService.createCategory(category));
-    }
-
-    @PutMapping("/category-list/{id}")
-    public BaseApiResponse<?> updateCategory(@PathVariable String id, @RequestBody Category category) {
-        return BaseApiResponse.succeed(adminService.updateCategory(id,category));
-    }
-
-    @DeleteMapping("/category-list/{id}")
-    public BaseApiResponse<?> deleteCategory(@PathVariable String id) {
-        adminService.deleteCategory(id);
-        return BaseApiResponse.succeed();
-    }
-
     @GetMapping("/vehicleType-list")
     public BaseApiResponse<List<VehicleType>> getVehicleTypeList() {
         return BaseApiResponse.succeed(adminService.vehicleTypeList());
@@ -156,12 +84,10 @@ public class AdminController {
             @RequestParam(required = false) String vehicleName,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String fuelType
-
+            @RequestParam(required = false) String status
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
+        return BaseApiResponse.succeed(adminService.searchVehicles(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 
     @GetMapping("/listByUser")
@@ -191,33 +117,15 @@ public class AdminController {
             @RequestParam(required = false) String vehicleName,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String fuelType
-
+            @RequestParam(required = false) String status
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.searchVehiclesIsApproved(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
+        return BaseApiResponse.succeed(adminService.searchVehiclesIsApproved(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 
     @GetMapping("/brand-list")
     public BaseApiResponse<List<Brand>> getBrandList() {
         return BaseApiResponse.succeed(adminService.brandList());
-    }
-
-    @PostMapping("/brand-list")
-    public BaseApiResponse<?> createBrand(@RequestBody Brand brand) {
-        return BaseApiResponse.succeed(adminService.createBrand(brand));
-    }
-
-    @PutMapping("/brand-list/{id}")
-    public BaseApiResponse<?> updateBrand(@PathVariable String id, @RequestBody Brand brand) {
-        return BaseApiResponse.succeed(adminService.updateBrand(id,brand));
-    }
-
-    @DeleteMapping("/brand-list/{id}")
-    public BaseApiResponse<?> deleteBrand(@PathVariable String id) {
-        adminService.deleteBrand(id) ;
-        return BaseApiResponse.succeed();
     }
 
     @PutMapping("/view")
@@ -240,12 +148,6 @@ public class AdminController {
         adminService.approveVehicle(request);
         return BaseApiResponse.succeed();
     }
-
-    @DeleteMapping("/reject-vehicle")
-    public BaseApiResponse<Void> rejectVehicle(@RequestBody CreateVehicleRequest request) {
-        adminService.rejectVehicle(request);
-        return BaseApiResponse.succeed();
-    }
     @GetMapping("/rental-list")
     public BaseApiResponse<?> getRentalList(
             @RequestParam(defaultValue = "0") int page,
@@ -255,11 +157,9 @@ public class AdminController {
             @RequestParam(required = false) String vehicleName,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String fuelType
+            @RequestParam(required = false) String status
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return BaseApiResponse.succeed(adminService.rentalList(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
+        return BaseApiResponse.succeed(adminService.rentalList(brands, categories, vehicleName, startDate, endDate, pageable, status));
     }
 }
-
