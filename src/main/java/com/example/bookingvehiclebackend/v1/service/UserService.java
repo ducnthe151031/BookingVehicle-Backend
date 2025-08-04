@@ -23,7 +23,7 @@ public interface UserService {
 
     void resetPassword(String token, HttpServletResponse response, AuthenRequest changePasswordRequest);
 
-    Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status);
+    Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status,String fuelType);
 
 
 
@@ -36,4 +36,6 @@ public interface UserService {
     Object createReview(CreateReviewRequest request);
 
     Double calculateAverageRating(String vehicleId);
+
+    Object payLateFee(String request) throws Exception;
 }
