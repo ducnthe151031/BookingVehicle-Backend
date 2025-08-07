@@ -36,4 +36,6 @@ public interface UserService {
     Object createReview(CreateReviewRequest request);
 
     Double calculateAverageRating(String vehicleId);
+
+    Object payLateFee(String id) throws Exception;
 }
