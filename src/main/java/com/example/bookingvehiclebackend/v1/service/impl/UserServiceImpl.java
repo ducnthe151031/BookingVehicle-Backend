@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
         User user = SecurityUtils.getCurrentUser()
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         if (!Objects.equals(user.getEmail(), request.getEmail())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_YOUR_EMAIL);
         }
         if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
