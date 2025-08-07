@@ -1,8 +1,10 @@
 package com.example.bookingvehiclebackend.v1.event.listener;
 
+import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
 import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
+import com.example.bookingvehiclebackend.v1.event.RentalRequestEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
@@ -32,6 +34,8 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
             handleRegistrationCompleteEvent(registrationCompleteEvent);
         } else if (event instanceof PasswordResetEvent passwordResetEvent) {
             handlePasswordResetEvent(passwordResetEvent);
+        } else if(event instanceof RentalRequestEvent rentalRequestEvent){
+            bookingVehicleSuccess(rentalRequestEvent) ;
         }
     }
 
@@ -89,6 +93,42 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message);
+        messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName);
+        messageHelper.setTo(user.getEmail());
+        messageHelper.setSubject(subject);
+        messageHelper.setText(mailContent, true);
+        mailSender.send(message);
+    }
+
+    private void bookingVehicleSuccess(RentalRequestEvent event) {
+        try {
+            user = event.getUser();
+            String jwtToken = event.getJwtToken();
+            authenService.saveUserToken(user, jwtToken);
+            sendBookingVehicle(event);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void sendBookingVehicle(RentalRequestEvent event) throws MessagingException, UnsupportedEncodingException {
+        RentalRequest rentalRequest = event.getRentalRequest();
+
+        String subject = "Xác nhận đặt xe thành công";
+        String senderName = "Dịch vụ Đặt xe";
+
+        String mailContent = "<p>Xin chào, " + user.getUsername() + ",</p>" +
+                "<p>Chúc mừng! Yêu cầu đặt xe của bạn đã được gửi thành công.</p>" +
+                "<p>Vui lòng kiểm tra lại thông tin đặt xe và đảm bảo bạn đã đọc và chấp nhận các điều khoản dịch vụ của chúng tôi.</p>";
+
+
+
+        mailContent += "<p>Xin cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.<br>Trân trọng,<br>Dịch vụ Đặt xe</p>";
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
         messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName);
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
