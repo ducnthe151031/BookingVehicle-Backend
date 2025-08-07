@@ -1,10 +1,16 @@
 package com.example.bookingvehiclebackend.v1.controller;
 
+import com.example.bookingvehiclebackend.config.JwtService;
 import com.example.bookingvehiclebackend.utils.BaseApiResponse;
 import com.example.bookingvehiclebackend.v1.dto.DeliveryStatus;
 import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
+import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
+
+import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
+import com.example.bookingvehiclebackend.v1.event.RentalRequestEvent;
+
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
@@ -15,6 +21,7 @@ import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +50,8 @@ public class UserController {
     private final AuthenService authenService;
     private final RentalRequestRepository rentalRequestRepository;
     private final VehicleRepository vehicleRepository;
+    private final ApplicationEventPublisher publisher;
+    private final JwtService jwtService;
 
     @PostMapping("/bookings")
     public BaseApiResponse<?> bookingVehicle(@RequestBody BookingVehicleRequest request) throws Exception {
@@ -128,6 +137,13 @@ public class UserController {
         v.setStatus("PENDING");
         rr.setDeliveryStatus(DeliveryStatus.READY_TO_PICK.name());
         vehicleRepository.save(v);
+
+        User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+        String jwtToken = jwtService.generateToken(user);
+
+        publisher.publishEvent(new RentalRequestEvent(user,rr,jwtToken));
+
+
         String frontendUrl = "http://localhost:5173";
         // Chuyển hướng về trang home
         response.sendRedirect(frontendUrl + "/home"); // Thay bằng domain thực tế của frontend
