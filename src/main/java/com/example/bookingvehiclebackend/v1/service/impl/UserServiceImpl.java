@@ -14,17 +14,20 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import vn.payos.PayOS;
 import vn.payos.type.PaymentData;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +36,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final VehicleRepository vehicleRepository;
@@ -49,15 +53,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Object bookingVehicle(BookingVehicleRequest request) throws Exception {
+        log.info("bookingVehicle request={}", request);
         if (!SecurityUtils.hasRole(Role.USER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
         }
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+        if ((user.getCitizenIdCardUrl() == null || user.getCitizenIdCardUrl().isEmpty()) &&
+                (user.getDriverLicenseUrl() == null || user.getDriverLicenseUrl().isEmpty())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_EMPTY_CCCD_AND_LICENSE);
+        }
+
         Vehicle v = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
-//        if (!Objects.equals(v.getStatus(), VehicleStatus.AVAILABLE.name())) {
-//            throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_UNAVAILABLE);
+//        if(ObjectUtils.isEmpty(request.getCccdFileName()) || ObjectUtils.isEmpty(request.getLicenseFileName())) {
+//            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_EMPTY_CCCD_AND_LICENSE);
 //        }
+
+
         List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(request.getVehicleId(), request.getStartDate(), request.getEndDate());
         if (!overlaps.isEmpty()) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);
@@ -79,7 +91,7 @@ public class UserServiceImpl implements UserService {
         long orderCode = System.currentTimeMillis();
         rr.setOrderCode(orderCode);
         int totalPrice = request.getTotalPrice().intValue();
-        PayOS payOS = new PayOS("65f3da88-9fa3-4ef3-8a5d-9393a14d3b84","c0473543-c34c-4601-8f23-88fc7fec2645","f3d3ea900cf6dd94e57b86b3c09ae3946ab397569ea3a930559a1c2a0797f25f") ;
+        PayOS payOS = new PayOS("28d524ef-8aec-43d0-ba0e-63864d087143","96863744-e699-400b-a24f-92bcc9c093c3","2bfbc44cb1c00d1f4d0752e86b5665ff341f856604c9009300a458320aca1b4f") ;
         PaymentData paymentData = PaymentData.builder()
                 .orderCode(orderCode)
                 .amount(totalPrice)
@@ -111,7 +123,7 @@ public class UserServiceImpl implements UserService {
         User user = SecurityUtils.getCurrentUser()
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         if (!Objects.equals(user.getEmail(), request.getEmail())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_YOUR_EMAIL);
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EMAIL_NOT_FOUND);
         }
         if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -128,7 +140,9 @@ public class UserServiceImpl implements UserService {
         //Neu nhu dung email roi -> thu hoi token cua email hien tai
         revokeAllUserTokens(user);
         String newToken = jwtService.generateToken(user);
-        String resetUrl = "http://localhost:5173/forgotPassword?token=";
+        // Tự động lấy port từ request header
+        String frontendUrl = SecurityUtils.extractFrontendUrl(httpServletRequest);
+        String resetUrl = frontendUrl + "/forgotPassword?token=";
         publisher.publishEvent(new PasswordResetEvent(user, resetUrl, newToken));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(newToken);
@@ -140,7 +154,7 @@ public class UserServiceImpl implements UserService {
         Token theToken = tokenRepository.findByAccessToken(token)
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.TOKEN_INVALID));
         if ("ACTIVE".equals(theToken.getUser().getFlagActive())) {
-            throw PvrsClientException.ofHandler(PvrsErrorHandler.USER_IS_VERIFIED);
+            return "User has been verified";
         }
         if (jwtService.isTokenValid(theToken.getAccessToken(), theToken.getUser())
                 && "INACTIVE".equals(theToken.getUser().getFlagActive())) {
@@ -218,7 +232,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status) {
+    public Object rentalList(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType) {
         return rentalRequestRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
@@ -231,11 +245,15 @@ public class UserServiceImpl implements UserService {
             if (brands != null && !brands.isEmpty()) {
                 predicates.add(root.get("brandId").in(brands));
             }
+
             if (categories != null && !categories.isEmpty()) {
                 predicates.add(root.get("categoryId").in(categories));
             }
             if (StringUtils.hasText(vehicleName)) {
                 predicates.add(cb.like(cb.lower(root.get("vehicleName")), "%" + vehicleName.toLowerCase() + "%"));
+            }
+            if (StringUtils.hasText(fuelType)) {
+                predicates.add(cb.like(cb.lower(root.get("fuelType")), "%" + fuelType.toLowerCase() + "%"));
             }
             if (StringUtils.hasText(status)) {
                 predicates.add(cb.equal(root.get("status"), status));
@@ -373,14 +391,13 @@ public class UserServiceImpl implements UserService {
         return average;
     }
 
-
     @Override
     public Object payLateFee(String id) throws Exception {
         long orderCode = System.currentTimeMillis();
         RentalRequest request = rentalRequestRepository.getReferenceById(id) ;
         request.setOrderCode(orderCode);
         User user = userRepository.getReferenceById(request.getCustomerId()) ;
-        PayOS payOS = new PayOS("65f3da88-9fa3-4ef3-8a5d-9393a14d3b84","c0473543-c34c-4601-8f23-88fc7fec2645","f3d3ea900cf6dd94e57b86b3c09ae3946ab397569ea3a930559a1c2a0797f25f") ;
+        PayOS payOS = new PayOS("28d524ef-8aec-43d0-ba0e-63864d087143","96863744-e699-400b-a24f-92bcc9c093c3","2bfbc44cb1c00d1f4d0752e86b5665ff341f856604c9009300a458320aca1b4f") ;
         PaymentData paymentData = PaymentData.builder()
                 .orderCode(orderCode)
                 .amount(request.getLateFee().intValue())
@@ -394,7 +411,6 @@ public class UserServiceImpl implements UserService {
 
         return rentalRequestRepository.save(request);
     }
-
 
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
