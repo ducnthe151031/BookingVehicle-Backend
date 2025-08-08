@@ -7,8 +7,10 @@ import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
+
 import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
 import com.example.bookingvehiclebackend.v1.event.RentalRequestEvent;
+
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
@@ -135,10 +137,12 @@ public class UserController {
         v.setStatus("PENDING");
         rr.setDeliveryStatus(DeliveryStatus.READY_TO_PICK.name());
         vehicleRepository.save(v);
+
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
         String jwtToken = jwtService.generateToken(user);
 
         publisher.publishEvent(new RentalRequestEvent(user,rr,jwtToken));
+
 
         String frontendUrl = "http://localhost:5173";
         // Chuyển hướng về trang home

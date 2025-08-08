@@ -37,5 +37,9 @@ public interface UserService {
 
     Double calculateAverageRating(String vehicleId);
 
+
     Object payLateFee(String id) throws Exception;
+
+    Object payLateFee(String request) throws Exception;
+
 }
