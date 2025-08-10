@@ -40,6 +40,5 @@ public interface UserService {
 
     Object payLateFee(String id) throws Exception;
 
-    Object payLateFee(String request) throws Exception;
 
 }
