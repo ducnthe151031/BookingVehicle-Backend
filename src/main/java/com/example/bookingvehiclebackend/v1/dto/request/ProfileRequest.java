@@ -17,4 +17,5 @@ public class ProfileRequest {
     // --- NEW PROPERTIES FOR IMAGE URLs ---
     private String citizenIdCardUrl;
     private String driverLicenseUrl;
+    private String avartarUrl;
 }
