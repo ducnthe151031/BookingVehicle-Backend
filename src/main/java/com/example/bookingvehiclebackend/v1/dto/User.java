@@ -56,7 +56,7 @@ public class User implements  UserDetails {
 
     @Column(name = "address", length = 100)
     private String address;
-
+    
     @Column(name = "citizen_id_card_url", length = 255) // Column for Citizen ID Card image URL
     private String citizenIdCardUrl;
 
@@ -94,8 +94,11 @@ public class User implements  UserDetails {
         return username;
     }
 
+
     @Override
     public String getPassword() {
         return password;
     }
+
+
 }
