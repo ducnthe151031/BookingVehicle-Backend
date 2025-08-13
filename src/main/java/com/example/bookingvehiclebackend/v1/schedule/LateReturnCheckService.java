@@ -45,7 +45,7 @@ public class LateReturnCheckService {
         Vehicle vehicle = vehicleRepository.findById(rental.getVehicleId())
                 .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
 
-        BigDecimal calculatedFee = vehicle.getPricePerDay().multiply(new BigDecimal(hoursLate));
+        BigDecimal calculatedFee = vehicle.getPricePerHour().multiply(new BigDecimal(hoursLate));
         rental.setLateFee(calculatedFee);
     }
 }
