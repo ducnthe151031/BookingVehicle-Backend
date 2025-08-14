@@ -275,10 +275,6 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setVehicleTypeId(request.getVehicleTypeId());
         vehicle.setApproved(null);
 
-        // Nếu xe chưa được duyệt và trạng thái hiện tại là "có sẵn" thì chuyển thành "đang xử lý"
-        if (Boolean.FALSE.equals(vehicle.getApproved()) && "có sẵn".equals(vehicle.getStatus())) {
-            vehicle.setStatus("đang xử lý");
-        }
 
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
             String[] imageParts = request.getImageUrl().split(",");
