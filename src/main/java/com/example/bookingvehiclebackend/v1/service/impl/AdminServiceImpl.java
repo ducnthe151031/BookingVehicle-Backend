@@ -276,7 +276,6 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setApproved(null);
 
 
-
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
             String[] imageParts = request.getImageUrl().split(",");
             List<String> savedImageUrls = new ArrayList<>();
@@ -689,5 +688,4 @@ public class AdminServiceImpl implements AdminService {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 }
-
 
