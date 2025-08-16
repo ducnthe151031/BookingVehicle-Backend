@@ -7,6 +7,7 @@ import com.example.bookingvehiclebackend.v1.dto.request.CouponRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
+import com.example.bookingvehiclebackend.v1.repository.CategoryRepository;
 import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +40,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 public class AdminController {
     private final AdminService adminService;
     private final VehicleRepository vehicleRepository;
+    private final CategoryRepository categoryRepository;
 
 
     //test

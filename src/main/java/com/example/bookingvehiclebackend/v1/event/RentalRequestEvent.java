@@ -16,6 +16,7 @@ public class RentalRequestEvent extends ApplicationEvent {
 
     public RentalRequestEvent(User user,RentalRequest rentalRequest, String jwtToken) {
         super(user);
+        this.user = user;
         this.rentalRequest = rentalRequest;
         this.jwtToken = jwtToken;
     }

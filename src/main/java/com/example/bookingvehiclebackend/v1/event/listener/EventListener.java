@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RegistrationCompleteEventListener  implements ApplicationListener<ApplicationEvent> {
+public class EventListener  implements ApplicationListener<ApplicationEvent> {
     private final AuthenService authenService;
     private final JavaMailSender mailSender;
     User user;
@@ -75,7 +75,7 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
                 "<p> Thank you <br> Users Registration Portal Service";
         MimeMessage message = mailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message);
-        messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName); //set = mail cua minh
+        messageHelper.setFrom("btung548@gmail.com", senderName); //set = mail cua minh
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
@@ -93,7 +93,7 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message);
-        messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName);
+        messageHelper.setFrom("btung548@gmail.com", senderName);
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
@@ -116,23 +116,48 @@ public class RegistrationCompleteEventListener  implements ApplicationListener<A
     private void sendBookingVehicle(RentalRequestEvent event) throws MessagingException, UnsupportedEncodingException {
         RentalRequest rentalRequest = event.getRentalRequest();
 
-        String subject = "Xác nhận đặt xe thành công";
+        String subject = "Hợp đồng thuê xe";
         String senderName = "Dịch vụ Đặt xe";
 
-        String mailContent = "<p>Xin chào, " + user.getUsername() + ",</p>" +
-                "<p>Chúc mừng! Yêu cầu đặt xe của bạn đã được gửi thành công.</p>" +
-                "<p>Vui lòng kiểm tra lại thông tin đặt xe và đảm bảo bạn đã đọc và chấp nhận các điều khoản dịch vụ của chúng tôi.</p>";
+        String mailContent = "<div style='font-family: Arial, sans-serif; line-height:1.6; color:#333;'>"
+                + "<h2 style='color:#2c3e50;'>🚗 Hợp đồng thuê xe</h2>"
+
+                + "<h3>Thông tin hợp đồng</h3>"
+                + "<p>Hợp đồng này được lập giữa <b>Công ty Cho thuê xe ABC</b> (Bên cho thuê) và <b>"
+                + rentalRequest.getCreatedBy() + "</b> (Bên thuê) cho việc thuê xe dưới đây:</p>"
+
+                + "<table style='width:100%; border-collapse:collapse;'>"
+
+                + "  <tr>"
+                + "    <td><b>Mã số hợp đồng:</b> " + rentalRequest.getId() + "</td>"
+                + "    <td><b>Thời gian thuê:</b> Từ " + rentalRequest.getStartDate() + " đến " + rentalRequest.getEndDate() + "</td>"
+                + "    <td><b>Tổng chi phí:</b> " + rentalRequest.getTotalPrice() + " VND</td>"
+                + "  </tr>"
+                + "</table>"
+
+                + "<h3>Điều khoản hợp đồng</h3>"
+                + "<ul>"
+                + "  <li>✔️ Bên thuê cam kết sử dụng xe đúng mục đích và tuân thủ mọi quy định giao thông.</li>"
+                + "  <li>✔️ Bên thuê chịu trách nhiệm bồi thường thiệt hại nếu xe bị hư hỏng do lỗi sử dụng.</li>"
+                + "  <li>✔️ Nếu bạn trả xe muộn, phí phạt sẽ được tính theo công thức: (giá thuê theo giờ) × (số giờ muộn).</li>"
+                + "  <li>✔️ Bên cho thuê có quyền thu hồi xe nếu phát hiện vi phạm hợp đồng.</li>"
+                + "</ul>"
+
+                + "<h3>Cam kết của các bên</h3>"
+                + "<p>Cả hai bên cam kết thực hiện đúng các điều khoản trong hợp đồng này. "
+                + "Mọi tranh chấp sẽ được giải quyết thông qua thương lượng hoặc tại tòa án có thẩm quyền.</p>"
 
 
-
-        mailContent += "<p>Xin cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.<br>Trân trọng,<br>Dịch vụ Đặt xe</p>";
+                + "<p style='margin-top:30px;'>Trân trọng,<br><b>Dịch vụ Đặt xe</b></p>"
+                + "</div>";
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
-        messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName);
+        messageHelper.setFrom("btung548@gmail.com", senderName);
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
+
         mailSender.send(message);
     }
 }

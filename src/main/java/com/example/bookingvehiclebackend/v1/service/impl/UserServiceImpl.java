@@ -5,6 +5,7 @@ import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
+import com.example.bookingvehiclebackend.v1.event.RentalRequestEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
 import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.*;
@@ -102,6 +103,9 @@ public class UserServiceImpl implements UserService {
         rr.setUrl(payOS.createPaymentLink(paymentData).getCheckoutUrl());
         vehicleRepository.save(v);
         RentalRequest savedRentalRequest = rentalRequestRepository.save(rr);
+        String jwtToken = jwtService.generateToken(user);
+
+        publisher.publishEvent(new RentalRequestEvent(user,rr,jwtToken));
 
         Payment payment = new Payment();
         payment.setUserId(user.getId());
@@ -173,36 +177,36 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(profileRequest.getPhoneNumber());
         user.setAddress(profileRequest.getAddress());
 
+
+
         if (profileRequest.getDriverLicenseUrl() != null && !profileRequest.getDriverLicenseUrl().isEmpty()) {
             try {
                 byte[] driverLicenseUrl = Base64.getDecoder().decode(profileRequest.getDriverLicenseUrl());
-                String driverLicenseUrlName = saveImageToFileSystem(driverLicenseUrl);
+                String driverLicenseUrlName = saveImageToFileSystem(driverLicenseUrl); // Lưu ảnh và lấy đường dẫn
                 user.setDriverLicenseUrl(driverLicenseUrlName);
-            } catch (IllegalArgumentException e) {
+
+            } catch (IllegalArgumentException e)
+            {
                 user.setDriverLicenseUrl(profileRequest.getDriverLicenseUrl());
+
             }
         }
+
 
         if (profileRequest.getCitizenIdCardUrl() != null && !profileRequest.getCitizenIdCardUrl().isEmpty()) {
             try {
                 byte[] citizenIdCardUrl = Base64.getDecoder().decode(profileRequest.getCitizenIdCardUrl());
-                String citizenIdCardUrlName = saveImageToFileSystem(citizenIdCardUrl);
+                String citizenIdCardUrlName = saveImageToFileSystem(citizenIdCardUrl); // Lưu ảnh và lấy đường dẫn
                 user.setCitizenIdCardUrl(citizenIdCardUrlName);
-            } catch (IllegalArgumentException e) {
+
+            } catch (IllegalArgumentException e)
+            {
                 user.setCitizenIdCardUrl(profileRequest.getCitizenIdCardUrl());
+
             }
         }
 
-        // NEW - xử lý avatar
-        if (profileRequest.getAvartarUrl() != null && !profileRequest.getAvartarUrl().isEmpty()) {
-            try {
-                byte[] avatarBytes = Base64.getDecoder().decode(profileRequest.getAvartarUrl());
-                String avatarFileName = saveImageToFileSystem(avatarBytes);
-                user.setAvartarUrl(avatarFileName);
-            } catch (IllegalArgumentException e) {
-                user.setAvartarUrl(profileRequest.getAvartarUrl());
-            }
-        }
+
 
         return userRepository.save(user);
     }

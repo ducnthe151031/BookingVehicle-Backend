@@ -276,6 +276,7 @@ public class AdminServiceImpl implements AdminService {
         vehicle.setApproved(null);
 
 
+
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
             String[] imageParts = request.getImageUrl().split(",");
             List<String> savedImageUrls = new ArrayList<>();
@@ -466,6 +467,10 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Object createBrand(Brand brand) {
+        // Kiểm tra xem name đã tồn tại trong database chưa
+        if (brandRepository.existsByName(brand.getName())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EXIST_BRANCH);
+        }
         return brandRepository.save(brand);
     }
 
@@ -474,6 +479,9 @@ public class AdminServiceImpl implements AdminService {
         Brand brand1 = brandRepository.findById(id).orElse(null);
 
         assert brand1 != null;
+        if (brandRepository.existsByName(brand.getName())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EXIST_BRANCH);
+        }
         brand1.setName(brand.getName());
         return brandRepository.save(brand1);
     }
@@ -485,6 +493,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Object createCategory(Category category) {
+        if (categoryRepository.existsByName(category.getName())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EXIST_CATEGORY);
+        }
         return categoryRepository.save(category);
     }
 
@@ -493,6 +504,9 @@ public class AdminServiceImpl implements AdminService {
         Category category1 = categoryRepository.findById(id).orElse(null);
 
         assert category1 != null;
+        if (categoryRepository.existsByName(category.getName())) {
+            throw PvrsClientException.ofHandler(PvrsErrorHandler.EXIST_CATEGORY);
+        }
         category1.setName(category.getName());
         return categoryRepository.save(category1);
     }
@@ -518,8 +532,8 @@ public class AdminServiceImpl implements AdminService {
     public Object updateUserRole(String id, User user) {
         User  user1 = userRepository.findById(id).orElse(null);
         assert user1 != null;
-        user.setRole(user1.getRole());
-        return userRepository.save(user);
+        user1.setRole(user.getRole());
+        return userRepository.save(user1);
     }
 
     @Override
@@ -688,4 +702,5 @@ public class AdminServiceImpl implements AdminService {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 }
+
 
