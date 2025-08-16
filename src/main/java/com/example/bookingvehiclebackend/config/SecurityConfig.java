@@ -31,6 +31,7 @@ public class SecurityConfig {
     private static final String[] WHITE_LIST_URL = {
             "v1/auth/**",
             "v1/user/**",
+            "v1/admin/**",
             "/verification-success.html",
             "/verification-failed.html",
             "/user-has-been-verified.html",
@@ -50,7 +51,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/v1/user/change-password").hasAnyRole("OWNER", "ADMIN", "USER","OPERATOR");
                     auth.requestMatchers(HttpMethod.GET, "/v1/user/verify-email").hasAnyRole("OWNER", "ADMIN", "USER","OPERATOR");
 
-                    auth.requestMatchers("v1/admin/**").hasAnyRole("ADMIN", "OWNER","USER","OPERATOR");
+//                    auth.requestMatchers("v1/admin/**").hasAnyRole("ADMIN", "OWNER","USER","OPERATOR");
 //                    auth.requestMatchers("v1/user/**").hasRole("USER");
                     auth.anyRequest().authenticated();
                 })
