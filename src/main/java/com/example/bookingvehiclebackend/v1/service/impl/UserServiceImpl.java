@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Object bookingVehicle(BookingVehicleRequest request) throws Exception {
         log.info("bookingVehicle request={}", request);
-        if (!SecurityUtils.hasRole(Role.USER)) {
+        if (!SecurityUtils.hasRole(Role.USER) && !SecurityUtils.hasRole(Role.OWNER)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.NOT_ALLOW_TO_BOOK_VEHICLE);
         }
         User user = SecurityUtils.getCurrentUser().orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
