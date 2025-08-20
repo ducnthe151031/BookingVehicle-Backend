@@ -551,7 +551,7 @@ public class AdminServiceImpl implements AdminService {
 
         booking.setReturnDate(LocalDateTime.now());
         booking.setStatus(RentalStatus.AVAILABLE.name());
-        booking.setDeliveryStatus(DeliveryStatus.RETURNED.name());
+        booking.setDeliveryStatus(DeliveryStatus.CONFIRM_RETURNED.name());
         Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
         assert vehicle != null;
         vehicle.setStatus("AVAILABLE");
@@ -564,6 +564,19 @@ public class AdminServiceImpl implements AdminService {
 
         booking.setStatus(RentalStatus.AVAILABLE.name());
         booking.setDeliveryStatus(DeliveryStatus.DELIVERED.name());
+        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+        assert vehicle != null;
+        vehicle.setStatus("RENTED");
+        return rentalRequestRepository.save(booking);
+    }
+
+    @Override
+    public Object returnBooking(String id) {
+        RentalRequest booking = rentalRequestRepository.findById(id)
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+
+        booking.setStatus(RentalStatus.AVAILABLE.name());
+        booking.setDeliveryStatus(DeliveryStatus.RETURNED.name());
         Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
         assert vehicle != null;
         vehicle.setStatus("RENTED");

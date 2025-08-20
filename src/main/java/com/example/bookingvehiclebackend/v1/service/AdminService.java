@@ -69,4 +69,6 @@ public interface AdminService {
     Object createUserList(AuthenRequest request, HttpServletRequest httpServletRequest);
 
     Object searchVehiclesByUser(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType);
+
+    Object returnBooking(String id);
 }

@@ -103,9 +103,9 @@ public class UserServiceImpl implements UserService {
         rr.setUrl(payOS.createPaymentLink(paymentData).getCheckoutUrl());
         vehicleRepository.save(v);
         RentalRequest savedRentalRequest = rentalRequestRepository.save(rr);
-        String jwtToken = jwtService.generateToken(user);
 
-        publisher.publishEvent(new RentalRequestEvent(user,rr,jwtToken));
+//        String jwtToken = jwtService.generateToken(user);
+//        publisher.publishEvent(new RentalRequestEvent(user,rr,jwtToken));
 
         Payment payment = new Payment();
         payment.setUserId(user.getId());

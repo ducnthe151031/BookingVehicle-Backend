@@ -93,6 +93,11 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.deliveredBooking(id));
     }
 
+    @PutMapping("/returnBooking/{id}")
+    public BaseApiResponse<?> returnBooking(@PathVariable String id) {
+        return BaseApiResponse.succeed(adminService.returnBooking(id));
+    }
+
     @PutMapping("/approve-returned-booking/{id}")
     public BaseApiResponse<?> returnedBooking(@PathVariable String id) {
         return BaseApiResponse.succeed(adminService.returnedBooking(id));
