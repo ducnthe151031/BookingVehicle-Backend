@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,6 +53,7 @@ public class AdminServiceImpl implements AdminService {
     private final VehicleTypeRepository vehicleTypeRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TrackingLogRepository trackingLogRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -704,6 +706,11 @@ public class AdminServiceImpl implements AdminService {
 
         Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
         return page;
+    }
+
+    @Override
+    public Object trackingLog(TrackingLog trackingLog) {
+        return trackingLogRepository.save(trackingLog);
     }
 
     private boolean isValidPassword(String password) {
