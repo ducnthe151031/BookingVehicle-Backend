@@ -4,6 +4,7 @@ import com.example.bookingvehiclebackend.config.JwtService;
 import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
+import com.example.bookingvehiclebackend.v1.dto.response.ReviewResponse;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
 import com.example.bookingvehiclebackend.v1.event.RentalRequestEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -276,12 +278,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<Review> getReviewsByVehicleId(String vehicleId, Pageable pageable) {
+    public Page<ReviewResponse> getReviewsByVehicleId(String vehicleId, Pageable pageable) {
         // Kiểm tra xem xe có tồn tại không
         if (!vehicleRepository.existsById(vehicleId)) {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_NOT_FOUND);
         }
-        return reviewRepository.findByVehicleId(vehicleId, pageable);
+        Page<Review> reviewPage = reviewRepository.findByVehicleId(vehicleId, pageable);
+        List<ReviewResponse> responseList = new ArrayList<>();
+        for (Review review : reviewPage.getContent()) {
+            ReviewResponse resp = new ReviewResponse();
+            resp.setId(review.getId());
+            resp.setUserId(review.getUserId());
+            // Lấy username từ userId
+            userRepository.findById(review.getUserId()).ifPresent(user -> resp.setUsername(user.getUsername()));
+            resp.setVehicleId(review.getVehicleId());
+            resp.setBookingId(review.getBookingId());
+            resp.setRating(review.getRating());
+            resp.setComment(review.getComment());
+            resp.setCreatedAt(review.getCreatedAt());
+            resp.setUpdatedAt(review.getUpdatedAt());
+            responseList.add(resp);
+        }
+        return new PageImpl<>(responseList, pageable, reviewPage.getTotalElements());
     }
 
     @Override
