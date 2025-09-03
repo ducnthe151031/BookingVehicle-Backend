@@ -67,6 +67,11 @@ public class AdminController {
         }
     }
 
+    @PostMapping("/tracking-log")
+    public BaseApiResponse<?> trackingLog(@RequestBody TrackingLog trackingLog) {
+        return BaseApiResponse.succeed(adminService.trackingLog(trackingLog));
+    }
+
     @GetMapping("/vehicles/{id}/images")
     public ResponseEntity<List<String>> getVehicleImages(@PathVariable String id) {
         Vehicle vehicle = vehicleRepository.findById(id)
