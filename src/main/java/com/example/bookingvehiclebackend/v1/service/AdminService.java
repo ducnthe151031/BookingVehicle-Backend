@@ -1,13 +1,11 @@
 package com.example.bookingvehiclebackend.v1.service;
 
-import com.example.bookingvehiclebackend.v1.dto.Brand;
-import com.example.bookingvehiclebackend.v1.dto.Category;
-import com.example.bookingvehiclebackend.v1.dto.User;
-import com.example.bookingvehiclebackend.v1.dto.VehicleType;
+import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.AuthenRequest;
 import com.example.bookingvehiclebackend.v1.dto.request.CreateVehicleRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Pageable;
+import com.example.bookingvehiclebackend.v1.dto.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -71,4 +69,6 @@ public interface AdminService {
     Object searchVehiclesByUser(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType);
 
     Object returnBooking(String id);
+
+    Object trackingLog(TrackingLog trackingLog);
 }
