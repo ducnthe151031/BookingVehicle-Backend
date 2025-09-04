@@ -179,6 +179,16 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(profileRequest.getPhoneNumber());
         user.setAddress(profileRequest.getAddress());
 
+        // Xử lý avatar
+        if (profileRequest.getAvartarUrl() != null && !profileRequest.getAvartarUrl().isEmpty()) {
+            try {
+                byte[] avatarBytes = Base64.getDecoder().decode(profileRequest.getAvartarUrl());
+                String avatarFileName = saveImageToFileSystem(avatarBytes); // Lưu ảnh và lấy đường dẫn
+                user.setAvartarUrl(avatarFileName);
+            } catch (IllegalArgumentException e) {
+                user.setAvartarUrl(profileRequest.getAvartarUrl());
+            }
+        }
 
 
         if (profileRequest.getDriverLicenseUrl() != null && !profileRequest.getDriverLicenseUrl().isEmpty()) {
