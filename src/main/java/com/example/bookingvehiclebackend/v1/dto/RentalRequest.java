@@ -65,12 +65,16 @@ public class RentalRequest {
 
     @Column(name = "payment_status")
     private boolean paymentStatus;
+
     @Column(name = "is_late")
     private boolean isLate;
+
     @Column(name = "late_fee_paid")
     private boolean lateFeePaid;
+
     @Column(name = "return_date")
     private LocalDateTime returnDate;
+
     @Column(name = "delivery_status", length = 100)
     private String deliveryStatus;
 
