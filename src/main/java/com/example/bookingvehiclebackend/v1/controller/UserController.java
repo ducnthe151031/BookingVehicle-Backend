@@ -7,6 +7,7 @@ import com.example.bookingvehiclebackend.v1.dto.RentalRequest;
 import com.example.bookingvehiclebackend.v1.dto.User;
 import com.example.bookingvehiclebackend.v1.dto.Vehicle;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
+import com.example.bookingvehiclebackend.v1.dto.response.CouponResponse;
 import com.example.bookingvehiclebackend.v1.event.RegistrationCompleteEvent;
 import com.example.bookingvehiclebackend.v1.event.RentalRequestEvent;
 import com.example.bookingvehiclebackend.v1.exception.PvrsClientException;
@@ -55,6 +56,11 @@ public class UserController {
     @PostMapping("/bookings")
     public BaseApiResponse<?> bookingVehicle(@RequestBody BookingVehicleRequest request) throws Exception {
         return BaseApiResponse.succeed(userService.bookingVehicle(request));
+    }
+
+    @GetMapping("/{id}")
+    public BaseApiResponse<?> getUserById(@PathVariable String id) {
+        return BaseApiResponse.succeed(userService.getUserById(id));
     }
 
     @PostMapping("/payLateFee/{id}")

@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService {
             throw PvrsClientException.ofHandler(PvrsErrorHandler.VEHICLE_ALREADY_BOOKED);
         }
         RentalRequest rr = new RentalRequest();
+        rr.setPickupAddress(request.getPickupAddress());
         rr.setVehicleId(request.getVehicleId());
         rr.setCustomerId(user.getId());
         rr.setStartDate(request.getStartDate());
@@ -99,7 +100,7 @@ public class UserServiceImpl implements UserService {
         PaymentData paymentData = PaymentData.builder()
                 .orderCode(orderCode)
                 .amount(totalPrice)
-                .description("Đơn thuê xe của " + user.getUsername())
+                .description(user.getUsername() + ' '+ user.getBankName() + ' '+ user.getBankNumber())
                 .returnUrl("http://localhost:8080/v1/user/payment/success?orderCode=" + orderCode) // Nếu thanh toán thành công
                 .cancelUrl("http://localhost:8080/v1/user/payment/failed?orderCode=" + orderCode) // Nếu hủy không thanh toán
                 .build();
@@ -179,6 +180,8 @@ public class UserServiceImpl implements UserService {
         user.setFullName(profileRequest.getFullName());
         user.setPhoneNumber(profileRequest.getPhoneNumber());
         user.setAddress(profileRequest.getAddress());
+        user.setBankNumber(profileRequest.getBankNumber());
+        user.setBankName(profileRequest.getBankName());
 
         // Xử lý avatar
         if (profileRequest.getAvartarUrl() != null && !profileRequest.getAvartarUrl().isEmpty()) {
@@ -512,6 +515,12 @@ public class UserServiceImpl implements UserService {
                     conflictBookings
             );
         }
+    }
+
+    @Override
+    public Object getUserById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> PvrsClientException.ofHandler(PvrsErrorHandler.USER_NOT_FOUND));
     }
 
 }

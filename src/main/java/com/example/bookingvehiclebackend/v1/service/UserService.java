@@ -42,4 +42,5 @@ public interface UserService {
 
     Object checkVehicleAvailability(CheckVehicleAvailabilityRequest request);
 
+    Object getUserById(String id);
 }

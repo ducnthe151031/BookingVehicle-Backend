@@ -31,4 +31,5 @@ public class BookingVehicleRequest {
     private String url ;
     private String cccdFileName;
     private String licenseFileName;
+    private String pickupAddress ;
 }
