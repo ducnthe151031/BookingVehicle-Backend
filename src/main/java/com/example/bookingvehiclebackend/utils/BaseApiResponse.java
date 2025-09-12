@@ -43,7 +43,7 @@ public class BaseApiResponse<T> {
     public static <T> BaseApiResponse<T> failure(String message) {
         return new BaseApiResponse<>(
                 HttpStatus.BAD_REQUEST.value(),
-                "ERR000001", // code tùy bạn define
+                "MEA0000033",
                 message,
                 null
         );
