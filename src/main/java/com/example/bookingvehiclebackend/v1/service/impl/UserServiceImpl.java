@@ -3,6 +3,7 @@ package com.example.bookingvehiclebackend.v1.service.impl;
 import com.example.bookingvehiclebackend.config.JwtService;
 import com.example.bookingvehiclebackend.v1.dto.*;
 import com.example.bookingvehiclebackend.v1.dto.request.*;
+import com.example.bookingvehiclebackend.v1.dto.response.CheckVehicleAvailabilityResponse;
 import com.example.bookingvehiclebackend.v1.dto.response.LoginResponse;
 import com.example.bookingvehiclebackend.v1.dto.response.ReviewResponse;
 import com.example.bookingvehiclebackend.v1.event.PasswordResetEvent;
@@ -454,4 +455,63 @@ public class UserServiceImpl implements UserService {
         });
         tokenRepository.saveAll(validUserTokens);
     }
+
+    @Override
+    public Object checkVehicleAvailability(CheckVehicleAvailabilityRequest request) {
+        log.info("checkVehicleAvailability request={}", request);
+
+        // Kiểm tra xe có tồn tại không
+        Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
+                .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.VEHICLE_NOT_FOUND));
+
+        // Kiểm tra thời gian hợp lệ
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            return new CheckVehicleAvailabilityResponse(
+                    false,
+                    "Thời gian bắt đầu không thể sau thời gian kết thúc",
+                    Collections.emptyList()
+            );
+        }
+
+//        // Kiểm tra thời gian không được trong quá khứ
+//        if (request.getStartDate().isBefore(LocalDateTime.now())) {
+//            return new CheckVehicleAvailabilityResponse(
+//                    false,
+//                    "Thời gian thuê không thể trong quá khứ",
+//                    Collections.emptyList()
+//            );
+//        }
+
+        // Tìm các booking trùng thời gian
+        List<RentalRequest> overlaps = rentalRequestRepository.findOverlappingRequests(
+                request.getVehicleId(),
+                request.getStartDate(),
+                request.getEndDate()
+        );
+
+        if (overlaps.isEmpty()) {
+            return new CheckVehicleAvailabilityResponse(
+                    true,
+                    "Xe có sẵn trong khoảng thời gian này",
+                    Collections.emptyList()
+            );
+        } else {
+            // Tạo danh sách booking trung với thời gian yêu cầu
+            List<CheckVehicleAvailabilityResponse.ConflictBooking> conflictBookings = overlaps.stream()
+                    .map(booking -> new CheckVehicleAvailabilityResponse.ConflictBooking(
+                            booking.getId(),
+                            booking.getStartDate(),
+                            booking.getEndDate(),
+                            booking.getStatus()
+                    ))
+                    .toList();
+
+            return new CheckVehicleAvailabilityResponse(
+                    false,
+                    "Xe đã được đặt trong khoảng thời gian này",
+                    conflictBookings
+            );
+        }
+    }
+
 }

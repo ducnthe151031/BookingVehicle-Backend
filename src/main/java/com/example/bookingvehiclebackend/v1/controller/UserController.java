@@ -37,6 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
@@ -256,5 +257,15 @@ public class UserController {
         // Giả sử logic đã được chuyển qua ReviewService
         Double averageRating = userService.calculateAverageRating(vehicleId);
         return BaseApiResponse.succeed(averageRating);
+    }
+
+    @PostMapping("/check-vehicle-availability")
+    public ResponseEntity<?> checkVehicleAvailability(@RequestBody CheckVehicleAvailabilityRequest request) {
+        try {
+            Object result = userService.checkVehicleAvailability(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }

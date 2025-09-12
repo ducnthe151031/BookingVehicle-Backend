@@ -219,7 +219,7 @@ public class AdminController {
 
     @PostMapping("/brand-list")
     public BaseApiResponse<?> createBrand(@RequestBody Brand brand) {
-        return BaseApiResponse.succeed(adminService.createBrand(brand));
+            return BaseApiResponse.succeed(adminService.createBrand(brand));
     }
 
     @PutMapping("/brand-list/{id}")

@@ -38,10 +38,8 @@ public enum PvrsErrorHandler implements IPvrsErrorHandler{
     INVALID_PASSWORD_FORMAT("MEA000030", "Password must contain at least one uppercase letter, one digit, and one special character."),
     NOT_EMPTY_CCCD_AND_LICENSE("MEA000031","Vui lòng cập nhật thông tin CCCD và bằng lái xe"),
     EMAIL_IS_EXISTED("MEA0000032", "Email already existed!" ),
-
-
     EXIST_BRANCH("MEA0000033","Tên thương hiệu đã tồn tại"),
-    EXIST_CATEGORY("MEA0000034","Tên hãng đã tồn tại" );
+    EXIST_CATEGORY("MEA0000034","Tên loại xe đã tồn tại" );
     private final String code;
     private final String message;
 

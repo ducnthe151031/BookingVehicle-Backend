@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RentalRequestRepository extends JpaRepository<RentalRequest, String>, JpaSpecificationExecutor<Vehicle> {
+
     // Kiểm tra xem xe đã có booking nào chưa vào khoảng thời gian
     @Query("""
         SELECT rr 
@@ -22,6 +23,7 @@ public interface RentalRequestRepository extends JpaRepository<RentalRequest, St
                 (:start < rr.endDate AND :end > rr.startDate)
               )
         """)
+
     List<RentalRequest> findOverlappingRequests(
             @Param("vehicleId") String vehicleId,
             @Param("start") LocalDateTime start,
