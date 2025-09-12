@@ -40,5 +40,6 @@ public interface UserService {
 
     Object payLateFee(String id) throws Exception;
 
+    Object checkVehicleAvailability(CheckVehicleAvailabilityRequest request);
 
 }
