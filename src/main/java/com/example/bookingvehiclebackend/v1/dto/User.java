@@ -63,6 +63,13 @@ public class User implements  UserDetails {
     @Column(name = "driver_license_url", length = 255) // Column for Driver's License image URL
     private String driverLicenseUrl;
 
+    @Column(name = "bank_number", length = 100)
+    private String bankNumber;
+
+
+    @Column(name = "bank_name", length = 100)
+    private String bankName;
+
 
 
     @Override

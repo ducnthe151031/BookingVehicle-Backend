@@ -78,4 +78,7 @@ public class RentalRequest {
     @Column(name = "delivery_status", length = 100)
     private String deliveryStatus;
 
+    @Column(name = "pickup_address", length = 100)
+    private String pickupAddress;
+
 }

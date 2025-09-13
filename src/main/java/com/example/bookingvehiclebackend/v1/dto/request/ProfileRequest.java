@@ -18,4 +18,6 @@ public class ProfileRequest {
     private String citizenIdCardUrl;
     private String driverLicenseUrl;
     private String avartarUrl;
+    private String bankNumber;
+    private String bankName;
 }

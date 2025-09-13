@@ -139,6 +139,7 @@ public class AdminController {
 
     @PostMapping("/category-list")
     public BaseApiResponse<?> createCategory(@RequestBody Category category) {
+
         return BaseApiResponse.succeed(adminService.createCategory(category));
     }
 
