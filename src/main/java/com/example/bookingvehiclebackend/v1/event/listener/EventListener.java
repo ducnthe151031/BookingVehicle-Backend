@@ -75,7 +75,7 @@ public class EventListener  implements ApplicationListener<ApplicationEvent> {
                 "<p> Thank you <br> Users Registration Portal Service";
         MimeMessage message = mailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message);
-        messageHelper.setFrom("btung548@gmail.com", senderName); //set = mail cua minh
+        messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName); //set = mail cua minh
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
@@ -93,7 +93,7 @@ public class EventListener  implements ApplicationListener<ApplicationEvent> {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message);
-        messageHelper.setFrom("btung548@gmail.com", senderName);
+        messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName);
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
@@ -123,7 +123,7 @@ public class EventListener  implements ApplicationListener<ApplicationEvent> {
                 + "<h2 style='color:#2c3e50;'>🚗 Hợp đồng thuê xe</h2>"
 
                 + "<h3>Thông tin hợp đồng</h3>"
-                + "<p>Hợp đồng này được lập giữa <b>Công ty Cho thuê xe ABC</b> (Bên cho thuê) và <b>"
+                + "<p>Hợp đồng này được lập giữa <b>Công ty Cho thuê xe PVRS</b> (Bên cho thuê) và <b>"
                 + rentalRequest.getCreatedBy() + "</b> (Bên thuê) cho việc thuê xe dưới đây:</p>"
 
                 + "<table style='width:100%; border-collapse:collapse;'>"
@@ -153,7 +153,7 @@ public class EventListener  implements ApplicationListener<ApplicationEvent> {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
-        messageHelper.setFrom("btung548@gmail.com", senderName);
+        messageHelper.setFrom("ducnthe151031@fpt.edu.vn", senderName);
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
