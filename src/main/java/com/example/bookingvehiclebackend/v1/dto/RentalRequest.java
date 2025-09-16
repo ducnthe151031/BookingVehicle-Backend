@@ -80,5 +80,4 @@ public class RentalRequest {
 
     @Column(name = "pickup_address", length = 100)
     private String pickupAddress;
-
 }

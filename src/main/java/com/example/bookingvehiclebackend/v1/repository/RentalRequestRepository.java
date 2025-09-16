@@ -18,7 +18,7 @@ public interface RentalRequestRepository extends JpaRepository<RentalRequest, St
         SELECT rr 
         FROM RentalRequest rr 
         WHERE rr.vehicleId= :vehicleId 
-          AND rr.status IN ('PENDING','APPROVED') 
+          AND rr.status IN ('PENDING','APPROVED','DELVERED','TRANSIT','RENTED') 
           AND (
                 (:start < rr.endDate AND :end > rr.startDate)
               )
