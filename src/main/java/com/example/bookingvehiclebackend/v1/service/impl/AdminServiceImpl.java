@@ -397,6 +397,7 @@ public class AdminServiceImpl implements AdminService {
         Specification<Vehicle> spec = new Specification<Vehicle>() {
             @Override
             public Predicate toPredicate(Root<Vehicle> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+
                 List<Predicate> predicates = new ArrayList<>();
 
                 // Subquery để kiểm tra xung đột thời gian
@@ -437,6 +438,10 @@ public class AdminServiceImpl implements AdminService {
 
                 // Điều kiện cơ bản
                 predicates.add(root.get("approved").in(true));
+
+                User currentUser = SecurityUtils.getCurrentUser()
+                        .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+                predicates.add(root.get("userId").in(currentUser.getId()).not());
 
                 if (brands != null && !brands.isEmpty()) {
                     predicates.add(root.get("branchId").in(brands));
