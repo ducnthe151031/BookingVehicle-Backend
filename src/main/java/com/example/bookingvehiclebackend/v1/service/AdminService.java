@@ -71,4 +71,6 @@ public interface AdminService {
     Object returnBooking(String id);
 
     Object trackingLog(TrackingLog trackingLog);
+
+    Object getVehicleListIsApprovedLanding(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType);
 }

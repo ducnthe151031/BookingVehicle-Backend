@@ -719,6 +719,86 @@ public class AdminServiceImpl implements AdminService {
         return trackingLogRepository.save(trackingLog);
     }
 
+    @Override
+    public Object getVehicleListIsApprovedLanding(List<String> brands, List<String> categories, String vehicleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String status, String fuelType) {
+        Specification<Vehicle> spec = new Specification<Vehicle>() {
+            @Override
+            public Predicate toPredicate(Root<Vehicle> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+
+                List<Predicate> predicates = new ArrayList<>();
+
+                // Subquery để kiểm tra xung đột thời gian
+                Subquery<String> subquery = query.subquery(String.class);
+                Root<RentalRequest> rentalRequestRoot = subquery.from(RentalRequest.class);
+                subquery.select(rentalRequestRoot.get("vehicleId"));
+
+                // Sử dụng giá trị startDate và endDate trực tiếp thay vì tham số
+                if (startDate != null && endDate != null) {
+                    subquery.where(cb.and(
+                            cb.equal(rentalRequestRoot.get("vehicleId"), root.get("id")),
+                            cb.or(
+                                    // Xung đột khi startDate nằm trong khoảng đã thuê
+                                    cb.and(
+                                            cb.greaterThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("startDate")),
+                                            cb.lessThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("endDate"))
+                                    ),
+                                    // Xung đột khi endDate nằm trong khoảng đã thuê
+                                    cb.and(
+                                            cb.greaterThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("startDate")),
+                                            cb.lessThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("endDate"))
+                                    ),
+                                    // Xung đột khi khoảng thời gian bao phủ toàn bộ khoảng đã thuê
+                                    cb.and(
+                                            cb.lessThanOrEqualTo(cb.literal(startDate), rentalRequestRoot.get("startDate")),
+                                            cb.greaterThanOrEqualTo(cb.literal(endDate), rentalRequestRoot.get("endDate"))
+                                    )
+                            ),
+                            cb.notEqual(rentalRequestRoot.get("status"), "CANCELLED") // Loại bỏ các yêu cầu đã hủy
+                    ));
+                } else {
+                    // Nếu không có startDate hoặc endDate, không áp dụng điều kiện thời gian
+                    subquery.where(cb.and(
+                            cb.equal(rentalRequestRoot.get("vehicleId"), root.get("id")),
+                            cb.notEqual(rentalRequestRoot.get("status"), "CANCELLED")
+                    ));
+                }
+
+                // Điều kiện cơ bản
+                predicates.add(root.get("approved").in(true));
+
+//                User currentUser = SecurityUtils.getCurrentUser()
+//                        .orElseThrow(PvrsClientException.supplier(PvrsErrorHandler.UNAUTHORIZED));
+//                predicates.add(root.get("userId").in(currentUser.getId()).not());
+
+                if (brands != null && !brands.isEmpty()) {
+                    predicates.add(root.get("branchId").in(brands));
+                }
+                if (categories != null && !categories.isEmpty()) {
+                    predicates.add(root.get("categoryId").in(categories));
+                }
+                if (StringUtils.hasText(vehicleName)) {
+                    predicates.add(cb.like(cb.lower(root.get("vehicleName")), "%" + vehicleName.toLowerCase() + "%"));
+                }
+                if (StringUtils.hasText(status)) {
+                    predicates.add(cb.equal(root.get("status"), status));
+                }
+
+                // Thêm điều kiện không có xung đột thời gian
+                if (startDate != null && endDate != null) {
+                    predicates.add(cb.not(root.get("id").in(subquery)));
+                }
+
+                if (StringUtils.hasText(fuelType)) {
+                    predicates.add(cb.equal(root.get("fuelType"), fuelType));
+                }
+                return cb.and(predicates.toArray(new Predicate[0]));
+            }
+        };
+
+        Page<Vehicle> page = vehicleRepository.findAll(spec, pageable);
+        return page;
+    }
+
     private boolean isValidPassword(String password) {
         // Ít nhất 1 chữ hoa, 1 chữ số và 1 ký tự đặc biệt
         String regex = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&^#()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/~`]).{8,}$";

@@ -212,6 +212,23 @@ public class AdminController {
         return BaseApiResponse.succeed(adminService.searchVehiclesIsApproved(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
     }
 
+    @GetMapping("/list/approved/landing")
+    public BaseApiResponse<?> getVehicleListIsApprovedLanding(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) List<String> brands,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) String vehicleName,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String fuelType
+
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return BaseApiResponse.succeed(adminService.getVehicleListIsApprovedLanding(brands, categories, vehicleName, startDate, endDate, pageable, status,fuelType));
+    }
+
     @GetMapping("/brand-list")
     public BaseApiResponse<List<Brand>> getBrandList() {
         return BaseApiResponse.succeed(adminService.brandList());
