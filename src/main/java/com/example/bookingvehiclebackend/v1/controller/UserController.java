@@ -15,6 +15,7 @@ import com.example.bookingvehiclebackend.v1.exception.PvrsErrorHandler;
 import com.example.bookingvehiclebackend.v1.repository.RentalRequestRepository;
 import com.example.bookingvehiclebackend.v1.repository.VehicleRepository;
 import com.example.bookingvehiclebackend.v1.service.AuthenService;
+import com.example.bookingvehiclebackend.v1.service.CouponService;
 import com.example.bookingvehiclebackend.v1.service.UserService;
 import com.example.bookingvehiclebackend.v1.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,6 +53,7 @@ public class UserController {
     private final VehicleRepository vehicleRepository;
     private final ApplicationEventPublisher publisher;
     private final JwtService jwtService;
+    private final CouponService couponService;
 
     @PostMapping("/bookings")
     public BaseApiResponse<?> bookingVehicle(@RequestBody BookingVehicleRequest request) throws Exception {
@@ -90,6 +92,11 @@ public class UserController {
         } catch (MalformedURLException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/coupons")
+    public BaseApiResponse<List<CouponResponse>> getUserCoupons() {
+        return BaseApiResponse.succeed(couponService.getAllCoupons());
     }
 
     @PostMapping("/change-password")
